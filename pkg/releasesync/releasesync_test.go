@@ -1,8 +1,13 @@
 package releasesync
 
 import (
+	"fmt"
+	"net/http"
 	"testing"
 	"time"
+
+	"github.com/openshift/sippy/pkg/db"
+	"github.com/openshift/sippy/pkg/db/models"
 )
 
 func TestReleaseTagForcedFlag(t *testing.T) {
@@ -165,4 +170,139 @@ func buildReleaseDetails(hasFailedBlockingJobs bool) ReleaseDetails {
 
 	return releaseDetails
 
+}
+
+func Test_releaseSyncOptions_fetchReleaseTags(t *testing.T) {
+	type fields struct {
+		db            *db.DB
+		httpClient    *http.Client
+		releases      []string
+		architectures []string
+	}
+	type args struct {
+		release string
+	}
+	//tests := []struct {
+	//	name   string
+	//	fields fields
+	//	args   args
+	//	want   []ReleaseTags
+	//}{
+	//	// TODO: Add test cases.
+	//}
+	for _, tt := range []string{"test1"} {
+		t.Run(tt, func(t *testing.T) {
+			client := http.Client{Timeout: time.Duration(1) * time.Second}
+			r := &releaseSyncOptions{
+				db:            nil,
+				httpClient:    &client,
+				releases:      []string{"4.11"},
+				architectures: []string{"amd64"},
+			}
+			got := r.fetchReleaseTags("4.11.0-0.ci")
+			if len(got) < 1 {
+				t.Errorf("releaseSyncOptions.fetchReleaseTags() =")
+			}
+		})
+	}
+}
+
+func Test_releaseSyncOptions_fetchReleaseDetails(t *testing.T) {
+	type fields struct {
+		db            *db.DB
+		httpClient    *http.Client
+		releases      []string
+		architectures []string
+	}
+	type args struct {
+		architecture string
+		release      string
+		tag          ReleaseTag
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   ReleaseDetails
+	}{
+		// TODO: Add test cases.
+		{
+			//name: "hello",
+			//fields {
+			//	db: nil,
+			//	httpClient: nil,
+			//	releases: []string{""},
+			//	architectures: []string{""},
+			//},
+			//args: args{},
+			//tag: ReleaseTag{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := http.Client{Timeout: time.Duration(1) * time.Second}
+			r := &releaseSyncOptions{
+				db:            tt.fields.db,
+				httpClient:    &client,
+				releases:      tt.fields.releases,
+				architectures: tt.fields.architectures,
+			}
+			fmt.Println(r)
+			rt := ReleaseTag{
+				Name:        "4.11.0-0.ci-2022-07-20-124210",
+				Phase:       "Ready",
+				PullSpec:    "registry.ci.openshift.org/ocp/release:4.11.0-0.ci-2022-07-20-124210",
+				DownloadURL: "https://openshift-release-artifacts.apps.ci.l2s4.p1.openshiftapps.com/4.11.0-0.ci-2022-07-20-124210",
+			}
+			got := r.fetchReleaseDetails("amd64", "4.11.0-0.ci", rt)
+			fmt.Println(string(got.ChangeLog))
+			if got.Name == "Hello" {
+				t.Errorf("releaseSyncOptions.fetchReleaseDetails() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_releaseSyncOptions_buildReleaseTag(t *testing.T) {
+	type fields struct {
+		db            *db.DB
+		httpClient    *http.Client
+		releases      []string
+		architectures []string
+	}
+	type args struct {
+		architecture string
+		release      string
+		tag          ReleaseTag
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   *models.ReleaseTag
+	}{
+		// TODO: Add test cases.
+		{},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := http.Client{Timeout: time.Duration(1) * time.Second}
+			r := &releaseSyncOptions{
+				db:            tt.fields.db,
+				httpClient:    &client,
+				releases:      tt.fields.releases,
+				architectures: tt.fields.architectures,
+			}
+			rt := ReleaseTag{
+				Name:        "4.11.0-0.ci-2022-07-20-124210",
+				Phase:       "Accepted",
+				PullSpec:    "registry.ci.openshift.org/ocp/release:4.11.0-0.ci-2022-07-20-124210",
+				DownloadURL: "https://openshift-release-artifacts.apps.ci.l2s4.p1.openshiftapps.com/4.11.0-0.ci-2022-07-20-124210",
+			}
+			got := r.buildReleaseTag("amd64", "4.11.0-0.ci", rt)
+			if got.Phase == "Hello" {
+				t.Errorf("releaseSyncOptions.buildReleaseTag() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
