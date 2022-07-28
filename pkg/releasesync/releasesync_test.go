@@ -316,7 +316,7 @@ func Test_releaseJobRunsToDB(t *testing.T) {
 		args args
 		want []models.ReleaseJobRun
 	}{
-		{x
+		{
 			name: "hello",
 			args: args{},
 			want: []models.ReleaseJobRun{},
