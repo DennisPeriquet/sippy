@@ -306,3 +306,41 @@ func Test_releaseSyncOptions_buildReleaseTag(t *testing.T) {
 		})
 	}
 }
+
+func Test_releaseJobRunsToDB(t *testing.T) {
+	type args struct {
+		details ReleaseDetails
+	}
+	tests := []struct {
+		name string
+		args args
+		want []models.ReleaseJobRun
+	}{
+		{x
+			name: "hello",
+			args: args{},
+			want: []models.ReleaseJobRun{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := http.Client{Timeout: time.Duration(3) * time.Second}
+			r := &releaseSyncOptions{
+				db:            nil,
+				httpClient:    &client,
+				releases:      []string{"4.11"},
+				architectures: []string{"amd64"},
+			}
+			fmt.Println(r)
+			rt := ReleaseTag{
+				Name:        "4.11.0-0.ci-2022-07-27-174640",
+				Phase:       "Ready",
+				PullSpec:    "registry.ci.openshift.org/ocp/release:4.11.0-0.ci-2022-07-27-174640",
+				DownloadURL: "https://openshift-release-artifacts.apps.ci.l2s4.p1.openshiftapps.com/4.11.0-0.ci-2022-07-27-174640",
+			}
+			got := r.fetchReleaseDetails("amd64", "4.11.0-0.ci", rt)
+			rows := releaseJobRunsToDB(got)
+			fmt.Println(rows)
+		})
+	}
+}
