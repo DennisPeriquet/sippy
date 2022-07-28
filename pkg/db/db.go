@@ -28,6 +28,20 @@ type DB struct {
 	BatchSize int
 }
 
+func NewSmall(dsn string) (*DB, error) {
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &DB{
+		DB:        db,
+		BatchSize: 1024,
+	}, nil
+}
+
 func New(dsn string) (*DB, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),

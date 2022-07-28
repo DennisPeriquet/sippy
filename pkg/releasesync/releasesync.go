@@ -19,6 +19,7 @@ import (
 
 const (
 	releaseTagsTable = "release_tags"
+	releaseJobRuns   = "release_job_runs"
 	succeeded        = "Succeeded"
 	failed           = "Failed"
 )
@@ -92,7 +93,7 @@ func (r *releaseSyncOptions) Run() error {
 
 func (r *releaseSyncOptions) buildReleaseTag(architecture, release string, tag ReleaseTag) *models.ReleaseTag {
 	releaseDetails := r.fetchReleaseDetails(architecture, release, tag)
-	releaseTag := releaseDetailsToDB(architecture, tag, releaseDetails)
+	releaseTag := r.releaseDetailsToDB(architecture, tag, releaseDetails)
 
 	// We skip releases that aren't fully baked (i.e. all jobs run and changelog calculated)
 	if releaseTag == nil || (releaseTag.Phase != api.PayloadAccepted && releaseTag.Phase != api.PayloadRejected) {
@@ -163,7 +164,7 @@ func (r *releaseSyncOptions) fetchReleaseTags(release string) []ReleaseTags {
 	return allTags
 }
 
-func releaseDetailsToDB(architecture string, tag ReleaseTag, details ReleaseDetails) *models.ReleaseTag {
+func (r *releaseSyncOptions) releaseDetailsToDB(architecture string, tag ReleaseTag, details ReleaseDetails) *models.ReleaseTag {
 	release := models.ReleaseTag{
 		Architecture: architecture,
 		ReleaseTag:   details.Name,
@@ -202,7 +203,7 @@ func releaseDetailsToDB(architecture string, tag ReleaseTag, details ReleaseDeta
 	release.PreviousReleaseTag = changelog.PreviousReleaseTag()
 	release.Repositories = changelog.Repositories()
 	release.PullRequests = changelog.PullRequests()
-	release.JobRuns = releaseJobRunsToDB(details)
+	release.JobRuns = r.releaseJobRunsToDB(details)
 
 	// set forced flag
 	failedBlocking := false
@@ -225,21 +226,45 @@ func releaseDetailsToDB(architecture string, tag ReleaseTag, details ReleaseDeta
 	return &release
 }
 
-func releaseJobRunsToDB(details ReleaseDetails) []models.ReleaseJobRun {
+func (r *releaseSyncOptions) releaseJobRunsToDB(details ReleaseDetails) []models.ReleaseJobRun {
 	rows := make([]models.ReleaseJobRun, 0)
 	results := make(map[uint]models.ReleaseJobRun)
 
 	if jobs, ok := details.Results["blockingJobs"]; ok {
 		for platform, jobResult := range jobs {
 			id := idFromURL(jobResult.URL)
-			results[id] = models.ReleaseJobRun{
-				Name:           id,
-				JobName:        platform,
-				Kind:           "Blocking",
-				State:          jobResult.State,
-				URL:            jobResult.URL,
-				Retries:        jobResult.Retries,
-				TransitionTime: jobResult.TransitionTime,
+
+			// If the entry already exists in the database, create a new one with the same info and remove
+			// the current one (could be more than one)from the database to avoid creating a duplicate.
+			existingReleaseJobRuns := make([]models.ReleaseJobRun, 0)
+			if p := r.db.DB.Table(releaseJobRuns).Where(`"prow_job_run_id" = ?`, id).Scan(&existingReleaseJobRuns); p.Error == nil {
+				count := len(existingReleaseJobRuns)
+				if count > 1 {
+					fmt.Printf("Warning: found %d entries for %d", count, id)
+				}
+				results[id] = models.ReleaseJobRun{
+					Name:           id,
+					JobName:        platform,
+					Kind:           "Blocking",
+					State:          existingReleaseJobRuns[count-1].State,
+					URL:            existingReleaseJobRuns[count-1].URL,
+					Retries:        existingReleaseJobRuns[count-1].Retries,
+					TransitionTime: existingReleaseJobRuns[count-1].TransitionTime,
+				}
+
+				// Delete all entries that have this prow_job_run_id.
+				//r.db.DB.Raw(fmt.Sprintf("DELETE FROM %s where prow_job_run_id = %d", releaseJobRuns, id))
+				fmt.Println(fmt.Sprintf("DELETE FROM %s where prow_job_run_id = %d", releaseJobRuns, id))
+			} else {
+				results[id] = models.ReleaseJobRun{
+					Name:           id,
+					JobName:        platform,
+					Kind:           "Blocking",
+					State:          jobResult.State,
+					URL:            jobResult.URL,
+					Retries:        jobResult.Retries,
+					TransitionTime: jobResult.TransitionTime,
+				}
 			}
 		}
 	}
@@ -247,18 +272,42 @@ func releaseJobRunsToDB(details ReleaseDetails) []models.ReleaseJobRun {
 	if jobs, ok := details.Results["informingJobs"]; ok {
 		for platform, jobResult := range jobs {
 			id := idFromURL(jobResult.URL)
-			results[id] = models.ReleaseJobRun{
-				Name:           id,
-				JobName:        platform,
-				Kind:           "Informing",
-				State:          jobResult.State,
-				URL:            jobResult.URL,
-				Retries:        jobResult.Retries,
-				TransitionTime: jobResult.TransitionTime,
+
+			// If the entry already exists in the database, create a new one with the same info and remove
+			// the current one (could be more than one)from the database to avoid creating a duplicate.
+			existingReleaseJobRuns := make([]models.ReleaseJobRun, 0)
+			if p := r.db.DB.Table(releaseJobRuns).Where(`"prow_job_run_id" = ?`, id).Scan(&existingReleaseJobRuns); p.Error == nil {
+				count := len(existingReleaseJobRuns)
+				if count > 1 {
+					fmt.Printf("Warning: found %d entries for %d", count, id)
+				}
+				results[id] = models.ReleaseJobRun{
+					Name:           id,
+					JobName:        platform,
+					Kind:           "Blocking",
+					State:          existingReleaseJobRuns[count-1].State,
+					URL:            existingReleaseJobRuns[count-1].URL,
+					Retries:        existingReleaseJobRuns[count-1].Retries,
+					TransitionTime: existingReleaseJobRuns[count-1].TransitionTime,
+				}
+
+				// Delete all entries that have this prow_job_run_id.
+				//r.db.DB.Raw(fmt.Sprintf("DELETE FROM %s where prow_job_run_id = %d", releaseJobRuns, id))
+				fmt.Println(fmt.Sprintf("DELETE FROM %s where prow_job_run_id = %d", releaseJobRuns, id))
+			} else {
+				results[id] = models.ReleaseJobRun{
+					Name:           id,
+					JobName:        platform,
+					Kind:           "Informing",
+					State:          jobResult.State,
+					URL:            jobResult.URL,
+					Retries:        jobResult.Retries,
+					TransitionTime: jobResult.TransitionTime,
 			}
 		}
 	}
 
+	// For all upgrades, update the row for the corresponding prow job.
 	for _, upgrade := range append(details.UpgradesTo, details.UpgradesFrom...) {
 		for _, run := range upgrade.History {
 			id := idFromURL(run.URL)
@@ -266,6 +315,7 @@ func releaseJobRunsToDB(details ReleaseDetails) []models.ReleaseJobRun {
 				result.Upgrade = true
 				result.UpgradesFrom = upgrade.From
 				result.UpgradesTo = upgrade.To
+				results[id] = result
 			}
 		}
 	}
