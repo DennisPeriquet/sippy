@@ -164,6 +164,35 @@ func (r *releaseSyncOptions) fetchReleaseTags(release string) []ReleaseTags {
 	return allTags
 }
 
+// checkReleaseJobRun checks the database for an existing ReleaseJobRun with the given
+// id.  If it exists, it will return a new ReleaseJobRun with info from the already
+// existing ReleaseJobRun and remove the existing one from the database.
+func (r *releaseSyncOptions) checkReleaseJobRun(id uint, platform, kind string) models.ReleaseJobRun {
+
+	existingReleaseJobRuns := make([]models.ReleaseJobRun, 0)
+	if p := r.db.DB.Table(releaseJobRuns).Where(`"prow_job_run_id" = ?`, id).Scan(&existingReleaseJobRuns); p.Error == nil {
+		count := len(existingReleaseJobRuns)
+		if count > 1 {
+			fmt.Printf("Warning: found %d entries for %d", count, id)
+		}
+		ret := models.ReleaseJobRun{
+			Name:           id,
+			JobName:        platform,
+			Kind:           kind,
+			State:          existingReleaseJobRuns[count-1].State,
+			URL:            existingReleaseJobRuns[count-1].URL,
+			Retries:        existingReleaseJobRuns[count-1].Retries,
+			TransitionTime: existingReleaseJobRuns[count-1].TransitionTime,
+		}
+
+		// Delete all entries that have this prow_job_run_id.
+		//r.db.DB.Raw(fmt.Sprintf("DELETE FROM %s where prow_job_run_id = %d", releaseJobRuns, id))
+		fmt.Println(fmt.Sprintf("DELETE FROM %s where prow_job_run_id = %d", releaseJobRuns, id))
+		return ret
+	}
+	return nil
+}
+
 func (r *releaseSyncOptions) releaseDetailsToDB(architecture string, tag ReleaseTag, details ReleaseDetails) *models.ReleaseTag {
 	release := models.ReleaseTag{
 		Architecture: architecture,
@@ -234,32 +263,14 @@ func (r *releaseSyncOptions) releaseJobRunsToDB(details ReleaseDetails) []models
 		for platform, jobResult := range jobs {
 			id := idFromURL(jobResult.URL)
 
-			// If the entry already exists in the database, create a new one with the same info and remove
-			// the current one (could be more than one)from the database to avoid creating a duplicate.
-			existingReleaseJobRuns := make([]models.ReleaseJobRun, 0)
-			if p := r.db.DB.Table(releaseJobRuns).Where(`"prow_job_run_id" = ?`, id).Scan(&existingReleaseJobRuns); p.Error == nil {
-				count := len(existingReleaseJobRuns)
-				if count > 1 {
-					fmt.Printf("Warning: found %d entries for %d", count, id)
-				}
-				results[id] = models.ReleaseJobRun{
-					Name:           id,
-					JobName:        platform,
-					Kind:           "Blocking",
-					State:          existingReleaseJobRuns[count-1].State,
-					URL:            existingReleaseJobRuns[count-1].URL,
-					Retries:        existingReleaseJobRuns[count-1].Retries,
-					TransitionTime: existingReleaseJobRuns[count-1].TransitionTime,
-				}
-
-				// Delete all entries that have this prow_job_run_id.
-				//r.db.DB.Raw(fmt.Sprintf("DELETE FROM %s where prow_job_run_id = %d", releaseJobRuns, id))
-				fmt.Println(fmt.Sprintf("DELETE FROM %s where prow_job_run_id = %d", releaseJobRuns, id))
+			kind := "Blocking"
+			if newReleaseJobRun := r.checkReleaseJobRun(id, platform, kind); newReleaseJobRun != nil {
+				results[id] = newReleaseJobRun
 			} else {
 				results[id] = models.ReleaseJobRun{
 					Name:           id,
 					JobName:        platform,
-					Kind:           "Blocking",
+					Kind:           kind,
 					State:          jobResult.State,
 					URL:            jobResult.URL,
 					Retries:        jobResult.Retries,
@@ -273,32 +284,14 @@ func (r *releaseSyncOptions) releaseJobRunsToDB(details ReleaseDetails) []models
 		for platform, jobResult := range jobs {
 			id := idFromURL(jobResult.URL)
 
-			// If the entry already exists in the database, create a new one with the same info and remove
-			// the current one (could be more than one)from the database to avoid creating a duplicate.
-			existingReleaseJobRuns := make([]models.ReleaseJobRun, 0)
-			if p := r.db.DB.Table(releaseJobRuns).Where(`"prow_job_run_id" = ?`, id).Scan(&existingReleaseJobRuns); p.Error == nil {
-				count := len(existingReleaseJobRuns)
-				if count > 1 {
-					fmt.Printf("Warning: found %d entries for %d", count, id)
-				}
-				results[id] = models.ReleaseJobRun{
-					Name:           id,
-					JobName:        platform,
-					Kind:           "Blocking",
-					State:          existingReleaseJobRuns[count-1].State,
-					URL:            existingReleaseJobRuns[count-1].URL,
-					Retries:        existingReleaseJobRuns[count-1].Retries,
-					TransitionTime: existingReleaseJobRuns[count-1].TransitionTime,
-				}
-
-				// Delete all entries that have this prow_job_run_id.
-				//r.db.DB.Raw(fmt.Sprintf("DELETE FROM %s where prow_job_run_id = %d", releaseJobRuns, id))
-				fmt.Println(fmt.Sprintf("DELETE FROM %s where prow_job_run_id = %d", releaseJobRuns, id))
+			kind := "Informing"
+			if newReleaseJobRun := r.checkReleaseJobRun(id, platform, kind); newReleaseJobRun != nil {
+				results[id] = newReleaseJobRun
 			} else {
 				results[id] = models.ReleaseJobRun{
 					Name:           id,
 					JobName:        platform,
-					Kind:           "Informing",
+					Kind:           kind,
 					State:          jobResult.State,
 					URL:            jobResult.URL,
 					Retries:        jobResult.Retries,
