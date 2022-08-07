@@ -167,7 +167,7 @@ func (r *releaseSyncOptions) fetchReleaseTags(release string) []ReleaseTags {
 // checkReleaseJobRun checks the database for an existing ReleaseJobRun with the given
 // id.  If it exists, it will return a new ReleaseJobRun with info from the already
 // existing ReleaseJobRun and remove the existing one from the database.
-func (r *releaseSyncOptions) checkReleaseJobRun(id uint, platform, kind string) models.ReleaseJobRun {
+func (r *releaseSyncOptions) checkReleaseJobRun(id uint, platform, kind string) *models.ReleaseJobRun {
 
 	existingReleaseJobRuns := make([]models.ReleaseJobRun, 0)
 	if p := r.db.DB.Table(releaseJobRuns).Where(`"prow_job_run_id" = ?`, id).Scan(&existingReleaseJobRuns); p.Error == nil {
@@ -188,7 +188,7 @@ func (r *releaseSyncOptions) checkReleaseJobRun(id uint, platform, kind string) 
 		// Delete all entries that have this prow_job_run_id.
 		//r.db.DB.Raw(fmt.Sprintf("DELETE FROM %s where prow_job_run_id = %d", releaseJobRuns, id))
 		fmt.Println(fmt.Sprintf("DELETE FROM %s where prow_job_run_id = %d", releaseJobRuns, id))
-		return ret
+		return &ret
 	}
 	return nil
 }
@@ -265,7 +265,7 @@ func (r *releaseSyncOptions) releaseJobRunsToDB(details ReleaseDetails) []models
 
 			kind := "Blocking"
 			if newReleaseJobRun := r.checkReleaseJobRun(id, platform, kind); newReleaseJobRun != nil {
-				results[id] = newReleaseJobRun
+				results[id] = *newReleaseJobRun
 			} else {
 				results[id] = models.ReleaseJobRun{
 					Name:           id,
@@ -286,7 +286,7 @@ func (r *releaseSyncOptions) releaseJobRunsToDB(details ReleaseDetails) []models
 
 			kind := "Informing"
 			if newReleaseJobRun := r.checkReleaseJobRun(id, platform, kind); newReleaseJobRun != nil {
-				results[id] = newReleaseJobRun
+				results[id] = *newReleaseJobRun
 			} else {
 				results[id] = models.ReleaseJobRun{
 					Name:           id,
@@ -296,6 +296,7 @@ func (r *releaseSyncOptions) releaseJobRunsToDB(details ReleaseDetails) []models
 					URL:            jobResult.URL,
 					Retries:        jobResult.Retries,
 					TransitionTime: jobResult.TransitionTime,
+				}
 			}
 		}
 	}
