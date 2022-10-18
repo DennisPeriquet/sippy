@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 const (
@@ -17,7 +19,20 @@ const (
 )
 
 func buildURL(apiPath string) string {
-	return fmt.Sprintf("http://localhost:%d%s", APIPort, apiPath)
+	env_sippy_api_port := os.Getenv("SIPPY_API_PORT")
+	env_sippy_endpoint := os.Getenv("SIPPY_ENDPOINT")
+
+	var port = APIPort
+	if len(env_sippy_api_port) > 0 {
+		val, err := strconv.Atoi(env_sippy_api_port)
+		if err == nil {
+			port = val
+		}
+	}
+	if len(env_sippy_endpoint) == 0 {
+		env_sippy_endpoint = "localhost"
+	}
+	return fmt.Sprintf("http://%s:%d%s", env_sippy_endpoint, port, apiPath)
 }
 
 func SippyRequest(path string, data interface{}) error {
