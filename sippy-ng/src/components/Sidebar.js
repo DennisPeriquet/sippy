@@ -118,21 +118,21 @@ export default function Sidebar(props) {
       </CapabilitiesContext.Consumer>
       <CapabilitiesContext.Consumer>
         {(value) => {
-          if (value.includes('build_clusters')) {
+          if (value.includes('openshift_releases')) {
             return (
               <Fragment>
                 <Divider />
                 <List
                   subheader={
-                    <ListSubheader component="div" id="infrastructure">
-                      Infrastructure
+                    <ListSubheader component="div" id="Overall Components">
+                      Overall Components
                     </ListSubheader>
                   }
                 >
                   <ListItem
-                    key={'build-cluster-health'}
+                    key={'release-health-'}
                     component={Link}
-                    to={`/build_clusters`}
+                    to={'/componentreadiness/' + '4.14'}
                     button
                     className={classes.nested}
                   >

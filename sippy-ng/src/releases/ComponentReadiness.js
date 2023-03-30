@@ -15,8 +15,8 @@ import './ComponentReadiness.css'
 import { BOOKMARKS } from '../constants'
 import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import JobTable from '../jobs/JobTable'
+import ReadinessReportOpts from '../releases/ReadinessReportOpts'
 import SimpleBreadcrumbs from '../components/SimpleBreadcrumbs'
-import TestByVariantTable from '../tests/TestByVariantTable'
 import TestTable from '../tests/TestTable'
 
 /**
@@ -96,7 +96,7 @@ export default function ComponentReadiness(props) {
             </Grid>
             <Switch>
               <Route path={path + '/operators'}>
-                <TestByVariantTable
+                <ReadinessReportOpts
                   release={props.release}
                   colorScale={[90, 100]}
                   data={data}
