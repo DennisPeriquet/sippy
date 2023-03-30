@@ -116,6 +116,37 @@ export default function Sidebar(props) {
           }
         }}
       </CapabilitiesContext.Consumer>
+      <CapabilitiesContext.Consumer>
+        {(value) => {
+          if (value.includes('build_clusters')) {
+            return (
+              <Fragment>
+                <Divider />
+                <List
+                  subheader={
+                    <ListSubheader component="div" id="infrastructure">
+                      Infrastructure
+                    </ListSubheader>
+                  }
+                >
+                  <ListItem
+                    key={'build-cluster-health'}
+                    component={Link}
+                    to={`/build_clusters`}
+                    button
+                    className={classes.nested}
+                  >
+                    <ListItemIcon>
+                      <Favorite />
+                    </ListItemIcon>
+                    <ListItemText primary="Component Readiness" />
+                  </ListItem>
+                </List>
+              </Fragment>
+            )
+          }
+        }}
+      </CapabilitiesContext.Consumer>
       <Divider />
       <List
         subheader={
@@ -293,7 +324,26 @@ export default function Sidebar(props) {
                     }
                   }}
                 </CapabilitiesContext.Consumer>
-
+                <CapabilitiesContext.Consumer>
+                  {(value) => {
+                    if (value.includes('openshift_releases')) {
+                      return (
+                        <ListItem
+                          key={'release-install-' + index}
+                          component={Link}
+                          to={'/componentreadiness/' + release}
+                          button
+                          className={classes.nested}
+                        >
+                          <ListItemIcon>
+                            <ExitToAppIcon />
+                          </ListItemIcon>
+                          <ListItemText primary="Component Readiness" />
+                        </ListItem>
+                      )
+                    }
+                  }}
+                </CapabilitiesContext.Consumer>
                 <CapabilitiesContext.Consumer>
                   {(value) => {
                     if (value.includes('openshift_releases')) {
