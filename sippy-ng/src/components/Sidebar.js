@@ -85,6 +85,14 @@ export default function Sidebar(props) {
           <ListItemText primary="Home" />
         </ListItem>
       </List>
+      <List>
+        <ListItem button component={Link} to="/Testing1" key="Testing Home">
+          <ListItemIcon>
+            <HomeIcon />
+          </ListItemIcon>
+          <ListItemText primary="Testing Home" />
+        </ListItem>
+      </List>
       <CapabilitiesContext.Consumer>
         {(value) => {
           if (value.includes('build_clusters')) {

@@ -35,6 +35,7 @@ import Sidebar from './components/Sidebar'
 import Tests from './tests/Tests'
 import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
+import UnderstandingBreakpoints from './releases/Testing1'
 import Upgrades from './releases/Upgrades'
 import VariantStatus from './jobs/VariantStatus'
 
@@ -446,7 +447,14 @@ export default function App(props) {
                       />
                     )}
                   />
-
+                  <Route
+                    path="/Testing1"
+                    render={(props) => (
+                      <div>
+                        <UnderstandingBreakpoints />
+                      </div>
+                    )}
+                  />
                   <Route path="/">{landingPage}</Route>
                 </Switch>
                 {/* eslint-enable react/prop-types */}
