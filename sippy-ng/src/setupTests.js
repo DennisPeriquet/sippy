@@ -29,6 +29,7 @@ global.requestAnimationFrame = (cb) => cb()
 
 // Set API URL for Sippy
 process.env.REACT_APP_API_URL = 'http://localhost:8080'
+//process.env.REACT_APP_API_URL = 'https://sippy.dptools.openshift.org/api'
 
 // Default PollyJS mode is replay, set to record to record
 // new API calls.

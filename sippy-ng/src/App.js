@@ -174,10 +174,12 @@ export default function App(props) {
   })
 
   const handleDrawerOpen = () => {
+    console.log('Drawer opened.')
     setDrawerOpen(true)
   }
 
   const handleDrawerClose = () => {
+    console.log('Drawer closed.')
     setDrawerOpen(false)
   }
 
