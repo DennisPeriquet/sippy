@@ -5,10 +5,8 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 ReactDOM.render(
-  <React.StrictMode>
-    <Router basename="/sippy-ng/">
-      <App />
-    </Router>
-  </React.StrictMode>,
+  <Router basename="/sippy-ng/">
+    <App />
+  </Router>,
   document.getElementById('root')
 )

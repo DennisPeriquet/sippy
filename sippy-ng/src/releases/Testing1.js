@@ -31,7 +31,7 @@ const i = (x) => {
     w: x
   }
 } // Bad: Syntax Error
-const UnderstandingBreakpoints = withStyles(styles)(({ classes }) => (
+const Testing1 = withStyles(styles)(({ classes }) => (
   <div className={classes.root}>
     <Grid container spacing={8}>
       <Grid item xs={12} sm={6} md={3}>
@@ -62,4 +62,4 @@ const UnderstandingBreakpoints = withStyles(styles)(({ classes }) => (
   </div>
 ))
 
-export default UnderstandingBreakpoints
+export default Testing1

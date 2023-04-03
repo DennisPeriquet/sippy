@@ -32,10 +32,11 @@ import ReleasePayloads from './releases/ReleasePayloads'
 import Repositories from './repositories/Repositories'
 import RepositoryDetails from './repositories/RepositoryDetails'
 import Sidebar from './components/Sidebar'
+import Testing1 from './releases/Testing1'
+import Testing2 from './releases/Testing2'
 import Tests from './tests/Tests'
 import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
-import UnderstandingBreakpoints from './releases/Testing1'
 import Upgrades from './releases/Upgrades'
 import VariantStatus from './jobs/VariantStatus'
 
@@ -453,7 +454,15 @@ export default function App(props) {
                     path="/Testing1"
                     render={(props) => (
                       <div>
-                        <UnderstandingBreakpoints />
+                        <Testing1 />
+                      </div>
+                    )}
+                  />
+                  <Route
+                    path="/Testing2"
+                    render={(props) => (
+                      <div>
+                        <Testing2 />
                       </div>
                     )}
                   />

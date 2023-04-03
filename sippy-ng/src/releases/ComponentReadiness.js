@@ -12,12 +12,9 @@ import {
 import React, { Fragment, useEffect } from 'react'
 
 import './ComponentReadiness.css'
-import { BOOKMARKS } from '../constants'
 import { Link, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
-import JobTable from '../jobs/JobTable'
 import ReadinessReportOpts from '../releases/ReadinessReportOpts'
 import SimpleBreadcrumbs from '../components/SimpleBreadcrumbs'
-import TestTable from '../tests/TestTable'
 
 /**
  *  ComponentReadiness is the landing page for ComponentReadiness.
@@ -89,20 +86,33 @@ export default function ComponentReadiness(props) {
                     label="Component Readiness"
                     value="operators"
                     component={Link}
-                    to={url + '/operators'}
+                    to={url + '/toplevel'}
+                  />
+                  <Tab
+                    label="Component Readiness"
+                    value="operators"
+                    component={Link}
+                    to={url + '/level2'}
                   />
                 </Tabs>
               </Paper>
             </Grid>
             <Switch>
-              <Route path={path + '/operators'}>
+              <Route path={path + '/toplevel'}>
                 <ReadinessReportOpts
                   release={props.release}
                   colorScale={[90, 100]}
                   data={data}
                 />
               </Route>
-              <Redirect from="/" to={url + '/operators'} />
+              <Route path={path + '/level2'}>
+                <ReadinessReportOpts
+                  release={props.release}
+                  colorScale={[90, 100]}
+                  data={data}
+                />
+              </Route>
+              <Redirect from="/" to={url + '/toplevel'} />
             </Switch>
           </TabContext>
         )}

@@ -93,6 +93,14 @@ export default function Sidebar(props) {
           <ListItemText primary="Testing Home" />
         </ListItem>
       </List>
+      <List>
+        <ListItem button component={Link} to="/Testing2" key="Testing Home2">
+          <ListItemIcon>
+            <HomeIcon />
+          </ListItemIcon>
+          <ListItemText primary="Testing Home2" />
+        </ListItem>
+      </List>
       <CapabilitiesContext.Consumer>
         {(value) => {
           if (value.includes('build_clusters')) {
@@ -145,7 +153,7 @@ export default function Sidebar(props) {
                     className={classes.nested}
                   >
                     <ListItemIcon>
-                      <Favorite />
+                      <InfoIcon />
                     </ListItemIcon>
                     <ListItemText primary="Component Readiness" />
                   </ListItem>
