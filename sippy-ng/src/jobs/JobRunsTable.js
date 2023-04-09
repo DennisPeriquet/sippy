@@ -19,33 +19,10 @@ import { Link } from 'react-router-dom'
 import { NumberParam, StringParam, useQueryParam } from 'use-query-params'
 import { ReportEndContext } from '../App'
 import Alert from '@material-ui/lab/Alert'
+import FilterButton from './FilterButton'
 import GridToolbar from '../datagrid/GridToolbar'
 import PropTypes from 'prop-types'
 import React, { Fragment, useEffect } from 'react'
-
-function FilterButton(props) {
-  const key = props.key
-  const value = props.value
-  const handleClick = (event) => {
-    console.log(event.target.innerText)
-    console.log(event.target.outerText)
-  }
-
-  //const letter = 'F'
-  const letter = props.key
-  const spanText = `result result-${letter}`
-  console.log('span: ', spanText)
-  return (
-    <Button key={props.key} name="button" onClick={handleClick}>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className={spanText}>{letter}</span>
-        </span>{' '}
-      </span>
-      {value}
-    </Button>
-  )
-}
 
 /**
  * JobRunsTable shows the list of all job runs matching any selected filters.
@@ -307,7 +284,7 @@ export default function JobRunsTable(props) {
     }
 
     if (filterModel && filterModel.items.length > 0) {
-      console.log('f: ', filterModel)
+      //console.log('f: ', filterModel)
       queryString +=
         '&filter=' + safeEncodeURIComponent(JSON.stringify(filterModel))
     }
@@ -413,8 +390,16 @@ export default function JobRunsTable(props) {
 
   const legend = (
     <div>
-      {Object.entries(tooltips).map(([key1, value]) => {
-        return <FilterButton key={key1} value={value}></FilterButton>
+      {Object.entries(tooltips).map(([pairKey, value]) => {
+        console.log('pairKey:', pairKey)
+        console.log('value:', value)
+        return (
+          <FilterButton
+            key={pairKey}
+            key1={pairKey}
+            value={value}
+          ></FilterButton>
+        )
       })}
     </div>
   )
@@ -521,9 +506,4 @@ JobRunsTable.propTypes = {
   filterModel: PropTypes.object,
   sort: PropTypes.string,
   sortField: PropTypes.string,
-}
-
-FilterButton.propTypes = {
-  key: PropTypes.string,
-  value: PropTypes.string,
 }
