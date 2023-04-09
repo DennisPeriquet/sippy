@@ -23,6 +23,30 @@ import GridToolbar from '../datagrid/GridToolbar'
 import PropTypes from 'prop-types'
 import React, { Fragment, useEffect } from 'react'
 
+function FilterButton(props) {
+  const key = props.key
+  const value = props.value
+  const handleClick = (event) => {
+    console.log(event.target.innerText)
+    console.log(event.target.outerText)
+  }
+
+  //const letter = 'F'
+  const letter = props.key
+  const spanText = `result result-${letter}`
+  console.log('span: ', spanText)
+  return (
+    <Button key={props.key} name="button" onClick={handleClick}>
+      <span className="legend-item">
+        <span className="results results-demo">
+          <span className={spanText}>{letter}</span>
+        </span>{' '}
+      </span>
+      {value}
+    </Button>
+  )
+}
+
 /**
  * JobRunsTable shows the list of all job runs matching any selected filters.
  */
@@ -283,6 +307,7 @@ export default function JobRunsTable(props) {
     }
 
     if (filterModel && filterModel.items.length > 0) {
+      console.log('f: ', filterModel)
       queryString +=
         '&filter=' + safeEncodeURIComponent(JSON.stringify(filterModel))
     }
@@ -388,56 +413,25 @@ export default function JobRunsTable(props) {
 
   const legend = (
     <div>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-S">S</span>
-        </span>{' '}
-        success
-      </span>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-F">F</span>
-        </span>{' '}
-        failure (e2e)
-      </span>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-f">f</span>
-        </span>{' '}
-        failure (other tests)
-      </span>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-U">U</span>
-        </span>{' '}
-        upgrade failure
-      </span>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-I">I</span>
-        </span>{' '}
-        setup failure (installer)
-      </span>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-N">N</span>
-        </span>{' '}
-        setup failure (infra)
-      </span>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-n">n</span>
-        </span>{' '}
-        failure before setup (infra)
-      </span>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-R">R</span>
-        </span>{' '}
-        running
-      </span>
+      {Object.entries(tooltips).map(([key1, value]) => {
+        return <FilterButton key={key1} value={value}></FilterButton>
+      })}
     </div>
   )
+
+  //  <div>
+  //    <span className="legend-item">
+  //      <span className="results results-demo">
+  //        <span className="result result-S">S</span>
+  //      </span>{' '}
+  //      success
+  //    </span>
+  //    <span className="legend-item">
+  //      <span className="results results-demo">
+  //        <span className="result result-F">F</span>
+  //      </span>{' '}
+  //      failure (e2e)
+  //    </span>
 
   const changePage = (newPage) => {
     setPageFlip(true)
@@ -527,4 +521,9 @@ JobRunsTable.propTypes = {
   filterModel: PropTypes.object,
   sort: PropTypes.string,
   sortField: PropTypes.string,
+}
+
+FilterButton.propTypes = {
+  key: PropTypes.string,
+  value: PropTypes.string,
 }

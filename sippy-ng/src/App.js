@@ -110,6 +110,7 @@ const lightMode = {
   palette: {
     type: 'light',
   },
+  timezone: 'UTC',
 }
 
 export const CapabilitiesContext = React.createContext([])
@@ -260,7 +261,7 @@ export default function App(props) {
                     )}
                   </IconButton>
                 </div>
-                <Sidebar releases={releases} />
+                <Sidebar releases={releases} theme={lightMode} />
               </Drawer>
 
               <main
@@ -432,6 +433,7 @@ export default function App(props) {
                       <PullRequests
                         key={'pr-' + props.match.params.release}
                         release={props.match.params.release}
+                        theme={lightMode}
                       />
                     )}
                   />

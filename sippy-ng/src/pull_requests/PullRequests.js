@@ -18,11 +18,12 @@ export default function PullRequests(props) {
       <Typography align="center" variant="h4">
         Pull Requests
       </Typography>
-      <PullRequestsTable release={props.release} />
+      <PullRequestsTable release={props.release} theme={props.theme} />
     </Fragment>
   )
 }
 
 PullRequests.propTypes = {
   release: PropTypes.string,
+  theme: PropTypes.object,
 }

@@ -9,10 +9,16 @@ import {
   Select,
   TextField,
 } from '@material-ui/core'
+import { Locale } from 'date-fns'
+
 import { Close } from '@material-ui/icons'
-import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
+import { createTheme, makeStyles } from '@material-ui/core/styles'
+import {
+  DateTimePicker,
+  KeyboardDateTimePicker,
+  MuiPickersUtilsProvider,
+} from '@material-ui/pickers'
 import { GridToolbarFilterDateUtils } from './GridToolbarFilterDateUtils'
-import { makeStyles } from '@material-ui/core/styles'
 import GridToolbarAutocomplete from './GridToolbarAutocomplete'
 import PropTypes from 'prop-types'
 import React, { Fragment } from 'react'
@@ -30,6 +36,33 @@ const useStyles = makeStyles((theme) => ({
     minWidth: 120,
   },
 }))
+
+const utcLocale = {
+  code: 'UTC',
+  formatDistance: () => '',
+  formatLong: {},
+  formatRelative: () => '',
+  localize: {
+    ordinalNumber: () => '',
+    era: () => '',
+    quarter: () => '',
+    month: () => '',
+    day: () => '',
+    dayPeriod: () => '',
+  },
+  match: {
+    ordinalNumber: /^\d+/,
+    era: () => null,
+    quarter: () => null,
+    month: () => null,
+    day: () => null,
+    dayPeriod: () => null,
+  },
+  options: {
+    weekStartsOn: 1,
+    firstWeekContainsDate: 1,
+  },
+}
 
 export const operatorWithoutValue = ['is empty', 'is not empty']
 
@@ -68,6 +101,13 @@ export default function GridToolbarFilterItem(props) {
     })
   }
 
+  const lightMode = {
+    palette: {
+      type: 'dark',
+    },
+    timezone: 'UTC',
+  }
+
   const columnFieldError =
     props.filterModel.errors && props.filterModel.errors.includes('columnField')
   const operatorValueError =
@@ -84,11 +124,76 @@ export default function GridToolbarFilterItem(props) {
       return ''
     }
 
+    //const currentTime = new Date()
+    //console.log(currentTime.toISOString())
+    //console.log(currentTime.toUTCString())
+    const now = new Date()
+    const utcString = now.toISOString().slice(0, 16)
+    //console.log(utcString)
+
     switch (columnType) {
-      case 'date':
+      case 'dateixxxn':
         return (
           <Fragment>
             <MuiPickersUtilsProvider utils={GridToolbarFilterDateUtils}>
+              <form className={classes.container} noValidate>
+                <TextField
+                  id="datetime-local"
+                  label="Date"
+                  type="datetime-local"
+                  format="MM/dd/yyyy HH:mm 'UTC'"
+                  defaultValue={utcString}
+                  className={classes.textField}
+                  onChange={(e) => {
+                    props.setFilterModel({
+                      columnField: props.filterModel.columnField,
+                      operatorValue: props.filterModel.operatorValue,
+                      value: e.getTime().toString(),
+                    })
+                  }}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </form>
+            </MuiPickersUtilsProvider>
+            <FormHelperText error={operatorValueError}>Required</FormHelperText>
+          </Fragment>
+        )
+      case 'date2':
+        return (
+          <Fragment>
+            <MuiPickersUtilsProvider utils={GridToolbarFilterDateUtils}>
+              <KeyboardDateTimePicker
+                disableToolbar
+                variant="inline"
+                format="MM/dd/yyyy HH:mm 'UTC'"
+                margin="normal"
+                id="date-picker-inline"
+                label="Date"
+                value={currentTime.toUTCString()}
+                onChange={(e) => {
+                  props.setFilterModel({
+                    columnField: props.filterModel.columnField,
+                    operatorValue: props.filterModel.operatorValue,
+                    value: e.getTime().toString(),
+                  })
+                }}
+                KeyboardButtonProps={{
+                  'aria-label': 'change date',
+                }}
+              />
+            </MuiPickersUtilsProvider>
+            <FormHelperText error={operatorValueError}>Required</FormHelperText>
+          </Fragment>
+        )
+      case 'date':
+        return (
+          <Fragment>
+            <MuiPickersUtilsProvider
+              utils={GridToolbarFilterDateUtils}
+              locale={utcLocale}
+            >
               <DateTimePicker
                 disabled={disabled}
                 showTodayButton

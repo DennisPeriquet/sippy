@@ -71,10 +71,12 @@ function Cell(props) {
           backgroundColor: cellBackground(result.current_pass_percentage),
         }}
       >
-        <PassRateCompare
-          current={result.current_pass_percentage}
-          previous={result.previous_pass_percentage}
-        />
+        <Link to={pathForExactTest(props.release, 'yada')}>
+          <PassRateCompare
+            current={result.current_pass_percentage}
+            previous={result.previous_pass_percentage}
+          />
+        </Link>
       </TableCell>
     )
   } else {
@@ -116,6 +118,19 @@ Cell.propTypes = {
 
 function Row(props) {
   const { columnNames, testName, results } = props
+
+  if (testName === 'Cluster upgrade.Operator upgrade authentication') {
+    console.log('columnNames = ', columnNames)
+  }
+  if (testName.includes('dns')) {
+    console.log('testName = ', testName)
+    console.log('columnNames = ', columnNames)
+    console.log('release = ', props.release)
+    //results.map((column) => {
+    //  console.log('results[column] = ', results[column])
+    //})
+    console.log('results ', results)
+  }
 
   const nameColumn = (
     <TableCell className={'cell-name'} key={testName}>
@@ -232,18 +247,24 @@ export default function TestByVariantTable(props) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {Object.keys(props.data.tests).map((test) => (
-              <Row
-                briefTable={props.briefTable}
-                colorScale={props.colorScale}
-                showFull={showFull}
-                key={test}
-                testName={test}
-                columnNames={props.data.column_names}
-                results={props.data.tests[test]}
-                release={props.release}
-              />
-            ))}
+            {Object.keys(props.data.tests).map((test) => {
+              if (test.includes('dns')) {
+                return (
+                  <Row
+                    briefTable={props.briefTable}
+                    colorScale={props.colorScale}
+                    showFull={showFull}
+                    key={test}
+                    testName={test}
+                    columnNames={props.data.column_names}
+                    results={props.data.tests[test]}
+                    release={props.release}
+                  />
+                )
+              } else {
+                return null
+              }
+            })}
           </TableBody>
         </Table>
       </TableContainer>

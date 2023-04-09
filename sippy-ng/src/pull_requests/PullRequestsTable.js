@@ -248,6 +248,7 @@ export default function PullRequestsTable(props) {
       type: 'date',
       field: 'merged_at',
       headerName: 'Merged at',
+      theme: props.theme,
       renderCell: (params) => {
         if (!params.value) {
           return '—'
@@ -469,6 +470,7 @@ PullRequestsTable.propTypes = {
   limit: PropTypes.number,
   pageSize: PropTypes.number,
   release: PropTypes.string.isRequired,
+  theme: PropTypes.object,
   classes: PropTypes.object,
   filterModel: PropTypes.object,
   sort: PropTypes.string,
