@@ -19,7 +19,6 @@ import { Link } from 'react-router-dom'
 import { NumberParam, StringParam, useQueryParam } from 'use-query-params'
 import { ReportEndContext } from '../App'
 import Alert from '@material-ui/lab/Alert'
-import FilterButton from './FilterButton'
 import GridToolbar from '../datagrid/GridToolbar'
 import PropTypes from 'prop-types'
 import React, { Fragment, useEffect } from 'react'
@@ -403,6 +402,33 @@ export default function JobRunsTable(props) {
       })}
     </div>
   )
+
+  function FilterButton(props) {
+    const mapKey = props.key1
+    const value = props.value
+
+    const handleClick = (event) => {
+      //console.log(event.target.outerText)
+      console.log(event.target.innerText)
+    }
+
+    const spanText = `result result-${mapKey}`
+    return (
+      <Button key={mapKey} name="button" onClick={handleClick}>
+        <span className="legend-item">
+          <span className="results results-demo">
+            <span className={spanText}>{mapKey}</span>
+          </span>{' '}
+        </span>
+        {value}
+      </Button>
+    )
+  }
+
+  FilterButton.propTypes = {
+    key1: PropTypes.string,
+    value: PropTypes.string,
+  }
 
   //  <div>
   //    <span className="legend-item">
