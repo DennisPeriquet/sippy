@@ -83,16 +83,18 @@ export default function ComponentReadiness(props) {
                   textColor="primary"
                 >
                   <Tab
-                    label="Component Readiness"
-                    value="operators"
+                    label="Component Readiness1"
+                    key="1"
+                    value="toplevel"
                     component={Link}
                     to={url + '/toplevel'}
                   />
                   <Tab
-                    label="Component Readiness"
-                    value="operators"
+                    label="Component Readiness2"
+                    key="2"
+                    value="toplevel2"
                     component={Link}
-                    to={url + '/level2'}
+                    to={url + '/toplevel2'}
                   />
                 </Tabs>
               </Paper>
@@ -105,9 +107,9 @@ export default function ComponentReadiness(props) {
                   data={data}
                 />
               </Route>
-              <Route path={path + '/level2'}>
+              <Route path={path + '/toplevel2'}>
                 <ReadinessReportOpts
-                  release={props.release}
+                  release={'4.13'}
                   colorScale={[90, 100]}
                   data={data}
                 />
