@@ -408,8 +408,23 @@ export default function JobRunsTable(props) {
     const value = props.value
 
     const handleClick = (event) => {
-      //console.log(event.target.outerText)
-      console.log(event.target.innerText)
+      const text = event.target.innerText
+
+      console.log(text)
+      switch (true) {
+        case text.startsWith('S'):
+          console.log('Got S')
+          break
+        case text.startsWith('F'):
+          console.log('Got F')
+          break
+        case text.startsWith('I'):
+          console.log('Got I')
+          break
+        default:
+          console.log('Entered default')
+          break
+      }
     }
 
     const spanText = `result result-${mapKey}`
