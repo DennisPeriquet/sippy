@@ -82,7 +82,7 @@ export default function JobRunsTable(props) {
       renderCell: (params) => {
         return (
           <Tooltip title={relativeTime(new Date(params.value), startDate)}>
-            <p>{new Date(params.value).toLocaleString()}</p>
+            <p>{new Date(params.value).toISOString()}</p>
           </Tooltip>
         )
       },
@@ -283,6 +283,7 @@ export default function JobRunsTable(props) {
     }
 
     if (filterModel && filterModel.items.length > 0) {
+      //console.log('f: ', filterModel)
       queryString +=
         '&filter=' + safeEncodeURIComponent(JSON.stringify(filterModel))
     }
@@ -388,56 +389,75 @@ export default function JobRunsTable(props) {
 
   const legend = (
     <div>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-S">S</span>
-        </span>{' '}
-        success
-      </span>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-F">F</span>
-        </span>{' '}
-        failure (e2e)
-      </span>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-f">f</span>
-        </span>{' '}
-        failure (other tests)
-      </span>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-U">U</span>
-        </span>{' '}
-        upgrade failure
-      </span>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-I">I</span>
-        </span>{' '}
-        setup failure (installer)
-      </span>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-N">N</span>
-        </span>{' '}
-        setup failure (infra)
-      </span>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-n">n</span>
-        </span>{' '}
-        failure before setup (infra)
-      </span>
-      <span className="legend-item">
-        <span className="results results-demo">
-          <span className="result result-R">R</span>
-        </span>{' '}
-        running
-      </span>
+      {Object.entries(tooltips).map(([pairKey, value]) => {
+        console.log('pairKey:', pairKey)
+        console.log('value:', value)
+        return (
+          <FilterButton
+            key={pairKey}
+            key1={pairKey}
+            value={value}
+          ></FilterButton>
+        )
+      })}
     </div>
   )
+
+  function FilterButton(props) {
+    const mapKey = props.key1
+    const value = props.value
+
+    const handleClick = (event) => {
+      const text = event.target.innerText
+
+      console.log(text)
+      switch (true) {
+        case text.startsWith('S'):
+          console.log('Got S')
+          break
+        case text.startsWith('F'):
+          console.log('Got F')
+          break
+        case text.startsWith('I'):
+          console.log('Got I')
+          break
+        default:
+          console.log('Entered default')
+          break
+      }
+    }
+
+    const spanText = `result result-${mapKey}`
+    return (
+      <Button key={mapKey} name="button" onClick={handleClick}>
+        <span className="legend-item">
+          <span className="results results-demo">
+            <span className={spanText}>{mapKey}</span>
+          </span>{' '}
+        </span>
+        {value}
+      </Button>
+    )
+  }
+
+  FilterButton.propTypes = {
+    key1: PropTypes.string,
+    value: PropTypes.string,
+  }
+
+  //  <div>
+  //    <span className="legend-item">
+  //      <span className="results results-demo">
+  //        <span className="result result-S">S</span>
+  //      </span>{' '}
+  //      success
+  //    </span>
+  //    <span className="legend-item">
+  //      <span className="results results-demo">
+  //        <span className="result result-F">F</span>
+  //      </span>{' '}
+  //      failure (e2e)
+  //    </span>
 
   const changePage = (newPage) => {
     setPageFlip(true)
