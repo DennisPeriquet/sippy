@@ -31,6 +31,10 @@ export default function JobRunsTable(props) {
   const [isLoaded, setLoaded] = React.useState(false)
   const [apiResult, setApiResult] = React.useState([])
 
+  // Keep track of the original filter model so we can mutate it starting
+  // with the original.
+  const originalFilterModel = props.filterModel
+
   const [filterModel = props.filterModel, setFilterModel] = useQueryParam(
     'filters',
     SafeJSONParam
@@ -82,7 +86,7 @@ export default function JobRunsTable(props) {
       renderCell: (params) => {
         return (
           <Tooltip title={relativeTime(new Date(params.value), startDate)}>
-            <p>{new Date(params.value).toISOString()}</p>
+            <p>{new Date(params.value).toLocaleString()}</p>
           </Tooltip>
         )
       },
@@ -283,7 +287,6 @@ export default function JobRunsTable(props) {
     }
 
     if (filterModel && filterModel.items.length > 0) {
-      //console.log('f: ', filterModel)
       queryString +=
         '&filter=' + safeEncodeURIComponent(JSON.stringify(filterModel))
     }
@@ -389,75 +392,62 @@ export default function JobRunsTable(props) {
 
   const legend = (
     <div>
-      {Object.entries(tooltips).map(([pairKey, value]) => {
-        console.log('pairKey:', pairKey)
-        console.log('value:', value)
+      {Object.entries(tooltips).map(([letter, message]) => {
         return (
           <FilterButton
-            key={pairKey}
-            key1={pairKey}
-            value={value}
+            key={letter}
+            letter={letter}
+            message={message}
           ></FilterButton>
         )
       })}
     </div>
   )
 
+  // Make buttons that have the letter code and corresponding message.  Clicking
+  // the button tweaks the filter so that we list jobs of that type.
   function FilterButton(props) {
-    const mapKey = props.key1
-    const value = props.value
+    const letterCode = props.letter
+    const message = props.message
 
-    const handleClick = (event) => {
-      const text = event.target.innerText
-
-      console.log(text)
-      switch (true) {
-        case text.startsWith('S'):
-          console.log('Got S')
-          break
-        case text.startsWith('F'):
-          console.log('Got F')
-          break
-        case text.startsWith('I'):
-          console.log('Got I')
-          break
-        default:
-          console.log('Entered default')
-          break
-      }
+    const handleClick = (id) => {
+      const newFilterModel = originalFilterModel
+      newFilterModel.items.push({
+        columnField: 'overall_result',
+        operatorValue: 'equals',
+        value: id,
+      })
+      setFilterModel(newFilterModel)
     }
 
-    const spanText = `result result-${mapKey}`
+    function handleDoubleClick() {
+      //const handleDoubleClick = () => {
+      console.log('doubleclicked')
+      setFilterModel(originalFilterModel)
+    }
+
+    const spanText = `result result-${letterCode}`
     return (
-      <Button key={mapKey} name="button" onClick={handleClick}>
+      <Button
+        key={letterCode}
+        name="button"
+        onClick={() => handleClick(letterCode)}
+        onDoubleClick={() => handleDoubleClick}
+      >
         <span className="legend-item">
           <span className="results results-demo">
-            <span className={spanText}>{mapKey}</span>
+            <span className={spanText}>{letterCode}</span>
           </span>{' '}
         </span>
-        {value}
+        {message}
       </Button>
     )
   }
 
   FilterButton.propTypes = {
-    key1: PropTypes.string,
-    value: PropTypes.string,
+    letter: PropTypes.string,
+    message: PropTypes.string,
   }
-
-  //  <div>
-  //    <span className="legend-item">
-  //      <span className="results results-demo">
-  //        <span className="result result-S">S</span>
-  //      </span>{' '}
-  //      success
-  //    </span>
-  //    <span className="legend-item">
-  //      <span className="results results-demo">
-  //        <span className="result result-F">F</span>
-  //      </span>{' '}
-  //      failure (e2e)
-  //    </span>
 
   const changePage = (newPage) => {
     setPageFlip(true)
