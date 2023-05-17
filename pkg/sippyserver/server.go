@@ -727,6 +727,31 @@ func (s *Server) jsonComponentReportFromBigQuery(w http.ResponseWriter, req *htt
 		advancedOption.IgnoreDisruption = true
 	}
 
+	// Capture the api call signature and see if we have it cached
+	apiCallSig := CompReadyAPIsig{
+		BaseRelease:     baseRelease.Release,
+		SampleRelease:   sampleRelease.Release,
+		BaseStartTime:   baseRelease.Start,
+		BaseEndTime:     baseRelease.End,
+		SampleStartTime: sampleRelease.Start,
+		SampleEndTime:   sampleRelease.End,
+		TestIDOption:    testIDOption,
+		VariantOption:   variantOption,
+		ExcludeOption:   excludeOption,
+		AdvancedOption:  advancedOption,
+	}
+
+	hashesMu.Lock()
+	_, ok := compReadyAPICache[apiCallSig]
+	hashesMu.Unlock()
+	if ok {
+		fmt.Println("We have a cache hit")
+		cacheRespondWithJSON(w, apiCallSig)
+		return
+	}
+
+	log.Warn("Going to do a BQ query")
+
 	outputs, errs := api.GetComponentReportFromBigQuery(
 		s.bigQueryClient,
 		baseRelease,
@@ -747,6 +772,9 @@ func (s *Server) jsonComponentReportFromBigQuery(w http.ResponseWriter, req *htt
 		return
 	}
 	api.RespondWithJSON(http.StatusOK, w, outputs)
+
+	// Any new queries are cached
+	cacheAPICallSig(apiCallSig, outputs)
 }
 
 func (s *Server) jsonJobBugsFromDB(w http.ResponseWriter, req *http.Request) {
