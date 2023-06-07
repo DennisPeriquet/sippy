@@ -11,7 +11,7 @@ import red from './red-3.png'
 import red_3d from './red-3d.png'
 
 // Set to true for debug mode
-export const debugMode = false
+export const debugMode = true
 
 // Make the HH:mm:ss as zeros to be more conducive to caching query caching.
 export const dateFormat = 'yyyy-MM-dd 00:00:00'
@@ -244,11 +244,11 @@ export function formatLongEndDate(aLongDateStr) {
 }
 
 // These will be loaded from sippy api when the ComponentReadiness component loads.
-export let excludeCloudsList = []
-export let excludeArchesList = []
-export let excludeNetworksList = []
-export let excludeUpgradesList = []
-export let excludeVariantsList = []
+export let excludeCloudsListE = []
+export let excludeArchesListE = []
+export let excludeNetworksListE = []
+export let excludeUpgradesListE = []
+export let excludeVariantsListE = []
 
 export const groupByList = ['cloud', 'arch', 'network', 'upgrade', 'variants']
 
@@ -266,15 +266,15 @@ export function expandEnvironment(environmentStr) {
   const items = environmentStr.split(' ')
   const params = {}
   items.forEach((item) => {
-    if (excludeCloudsList.includes(item)) {
+    if (excludeCloudsListE.includes(item)) {
       params.platform = item
-    } else if (excludeArchesList.includes(item)) {
+    } else if (excludeArchesListE.includes(item)) {
       params.arch = item
-    } else if (excludeNetworksList.includes(item)) {
+    } else if (excludeNetworksListE.includes(item)) {
       params.network = item
-    } else if (excludeUpgradesList.includes(item)) {
+    } else if (excludeUpgradesListE.includes(item)) {
       params.upgrade = item
-    } else if (excludeVariantsList.includes(item)) {
+    } else if (excludeVariantsListE.includes(item)) {
       params.variant = item
     } else {
       console.log(`Warning: Item '${item}' not found in lists`)

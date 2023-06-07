@@ -2,18 +2,19 @@ import './ComponentReadiness.css'
 import {
   dateEndFormat,
   dateFormat,
-  excludeArchesList,
-  excludeCloudsList,
-  excludeNetworksList,
-  excludeUpgradesList,
-  excludeVariantsList,
+  excludeArchesListE,
+  excludeCloudsListE,
+  excludeNetworksListE,
+  excludeUpgradesListE,
+  excludeVariantsListE,
   formatLongDate,
   formatLongEndDate,
+  getAPIUrl,
   getUpdatedUrlParts,
   groupByList,
 } from './CompReadyUtils'
 import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
-import { Fragment } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { GridToolbarFilterDateUtils } from '../datagrid/GridToolbarFilterDateUtils'
 import { Link } from 'react-router-dom'
 import AdvancedOptions from './AdvancedOptions'
@@ -64,6 +65,32 @@ export default function CompReadyMainInputs(props) {
     setIgnoreMissing,
     setIgnoreDisruption,
   } = props
+
+  const [excludeNetworksList, setExcludeNetworksList] = useState([])
+  const [excludeCloudsList, setExcludeCloudsList] = useState([])
+  const [excludeArchesList, setExcludeArchesList] = useState([])
+  const [excludeUpgradesList, setExcludeUpgradesList] = useState([])
+  const [excludeVariantsList, setExcludeVariantsList] = useState([])
+
+  useEffect(() => {
+    fetch(getAPIUrl() + '/variants')
+      .then((response) => response.json())
+      .then((data) => {
+        setExcludeCloudsList(data.platform)
+        setExcludeArchesList(data.arch)
+        setExcludeNetworksList(data.network)
+        setExcludeUpgradesList(data.upgrade)
+        setExcludeVariantsList(data.variant)
+      })
+      .catch((error) =>
+        console.error('Error loading variables via sippy api', error)
+      )
+  }, [])
+  excludeArchesListE = excludeVariantsList
+  excludeCloudsListE = excludeCloudsList
+  excludeNetworksListE = excludeNetworksList
+  excludeUpgradesListE = excludeUpgradesList
+  excludeVariantsListE = excludeVariantsList
 
   return (
     <Fragment>
