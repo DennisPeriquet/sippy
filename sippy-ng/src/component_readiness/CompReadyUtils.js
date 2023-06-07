@@ -244,13 +244,35 @@ export function formatLongEndDate(aLongDateStr) {
 }
 
 // These will be loaded from sippy api when the ComponentReadiness component loads.
-export let excludeCloudsListE = []
-export let excludeArchesListE = []
-export let excludeNetworksListE = []
-export let excludeUpgradesListE = []
-export let excludeVariantsListE = []
+export let excludeCloudsList = []
+export let excludeArchesList = []
+export let excludeNetworksList = []
+export let excludeUpgradesList = []
+export let excludeVariantsList = []
 
 export const groupByList = ['cloud', 'arch', 'network', 'upgrade', 'variants']
+
+export const fetchExcludeVars = () => {
+  return fetch(getAPIUrl() + '/variants')
+    .then((response) => response.json())
+    .then((data) => {
+      excludeNetworksList = data.network
+      excludeCloudsList = data.platform
+      excludeArchesList = data.arch
+      excludeUpgradesList = data.upgrade
+      excludeVariantsList = data.variant
+      console.log('variables are set')
+      console.log(excludeNetworksList)
+      console.log(excludeCloudsList)
+      console.log(excludeArchesList)
+      console.log(excludeUpgradesList)
+      console.log(excludeVariantsList)
+    })
+    .catch((error) => {
+      console.error('Error loading variables via sippy api', error)
+      throw error
+    })
+}
 
 // Take a string that is an "environment" (environment is a list of strings that describe
 // items in one or more of the lists above) and split it up so that it can be used in
@@ -263,18 +285,25 @@ export function expandEnvironment(environmentStr) {
   ) {
     return ''
   }
+  fetchExcludeVars()
+  console.log('expanding now')
+  console.log(excludeNetworksList)
+  console.log(excludeCloudsList)
+  console.log(excludeArchesList)
+  console.log(excludeUpgradesList)
+  console.log(excludeVariantsList)
   const items = environmentStr.split(' ')
   const params = {}
   items.forEach((item) => {
-    if (excludeCloudsListE.includes(item)) {
+    if (excludeCloudsList.includes(item)) {
       params.platform = item
-    } else if (excludeArchesListE.includes(item)) {
+    } else if (excludeArchesList.includes(item)) {
       params.arch = item
-    } else if (excludeNetworksListE.includes(item)) {
+    } else if (excludeNetworksList.includes(item)) {
       params.network = item
-    } else if (excludeUpgradesListE.includes(item)) {
+    } else if (excludeUpgradesList.includes(item)) {
       params.upgrade = item
-    } else if (excludeVariantsListE.includes(item)) {
+    } else if (excludeVariantsList.includes(item)) {
       params.variant = item
     } else {
       console.log(`Warning: Item '${item}' not found in lists`)

@@ -2,11 +2,12 @@ import './ComponentReadiness.css'
 import {
   dateEndFormat,
   dateFormat,
-  excludeArchesListE,
-  excludeCloudsListE,
-  excludeNetworksListE,
-  excludeUpgradesListE,
-  excludeVariantsListE,
+  excludeArchesList,
+  excludeCloudsList,
+  excludeNetworksList,
+  excludeUpgradesList,
+  excludeVariantsList,
+  fetchExcludeVars,
   formatLongDate,
   formatLongEndDate,
   getAPIUrl,
@@ -66,31 +67,9 @@ export default function CompReadyMainInputs(props) {
     setIgnoreDisruption,
   } = props
 
-  const [excludeNetworksList, setExcludeNetworksList] = useState([])
-  const [excludeCloudsList, setExcludeCloudsList] = useState([])
-  const [excludeArchesList, setExcludeArchesList] = useState([])
-  const [excludeUpgradesList, setExcludeUpgradesList] = useState([])
-  const [excludeVariantsList, setExcludeVariantsList] = useState([])
-
   useEffect(() => {
-    fetch(getAPIUrl() + '/variants')
-      .then((response) => response.json())
-      .then((data) => {
-        setExcludeCloudsList(data.platform)
-        setExcludeArchesList(data.arch)
-        setExcludeNetworksList(data.network)
-        setExcludeUpgradesList(data.upgrade)
-        setExcludeVariantsList(data.variant)
-      })
-      .catch((error) =>
-        console.error('Error loading variables via sippy api', error)
-      )
+    fetchExcludeVars()
   }, [])
-  excludeArchesListE = excludeVariantsList
-  excludeCloudsListE = excludeCloudsList
-  excludeNetworksListE = excludeNetworksList
-  excludeUpgradesListE = excludeUpgradesList
-  excludeVariantsListE = excludeVariantsList
 
   return (
     <Fragment>
