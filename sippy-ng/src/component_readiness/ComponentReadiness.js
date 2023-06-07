@@ -310,6 +310,21 @@ export default function ComponentReadiness(props) {
   const [data, setData] = React.useState({})
 
   useEffect(() => {
+    fetch(getAPIUrl() + '/variants')
+      .then((response) => response.json())
+      .then((data) => {
+        excludeCloudsList = data.platform
+        excludeArchesList = data.arch
+        excludeNetworksList = data.network
+        excludeUpgradesList = data.upgrade
+        excludeVariantsList = data.variant
+      })
+      .catch((error) =>
+        console.error('Error loading variables via sippy api', error)
+      )
+  }, [])
+
+  useEffect(() => {
     setData(initialPageTable)
     setIsLoaded(true)
   }, [])

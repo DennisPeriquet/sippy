@@ -243,59 +243,14 @@ export function formatLongEndDate(aLongDateStr) {
   return ret
 }
 
-// These next set of variables are used for CompReadyMainInputs
+// These will be loaded from sippy api when the ComponentReadiness component loads.
+export let excludeCloudsList = []
+export let excludeArchesList = []
+export let excludeNetworksList = []
+export let excludeUpgradesList = []
+export let excludeVariantsList = []
 
 export const groupByList = ['cloud', 'arch', 'network', 'upgrade', 'variants']
-
-// TODO: Get these from single place.
-export const excludeCloudsList = [
-  'alibaba',
-  'aws',
-  'azure',
-  'gcp',
-  'ibmcloud',
-  'libvirt',
-  'metal-assisted',
-  'metal-ipi',
-  'openstack',
-  'ovirt',
-  'unknown',
-  'vsphere',
-  'vsphere-upi',
-]
-
-// TODO: Get these from single place.
-export const excludeArchesList = [
-  'amd64',
-  'arm64',
-  'ppc64le',
-  's390x',
-  'heterogeneous',
-]
-
-export const excludeNetworksList = ['ovn', 'sdn']
-
-export const excludeUpgradesList = [
-  'no-upgrade',
-  'none',
-  'upgrade-micro',
-  'upgrade-minor',
-]
-
-export const excludeVariantsList = [
-  'assisted',
-  'compact',
-  'fips',
-  'hypershift',
-  'microshift',
-  'osd',
-  'proxy',
-  'rt',
-  'serial',
-  'single-node',
-  'standard',
-  'techpreview',
-]
 
 // Take a string that is an "environment" (environment is a list of strings that describe
 // items in one or more of the lists above) and split it up so that it can be used in
