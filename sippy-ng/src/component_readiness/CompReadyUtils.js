@@ -252,7 +252,12 @@ export let excludeVariantsList = []
 
 export const groupByList = ['cloud', 'arch', 'network', 'upgrade', 'variants']
 
+import { useMemo } from 'react'
+
 export const fetchExcludeVars = () => {
+  if (excludeCloudsList.length > 0) {
+    return null
+  }
   return fetch(getAPIUrl() + '/variants')
     .then((response) => response.json())
     .then((data) => {
@@ -261,18 +266,26 @@ export const fetchExcludeVars = () => {
       excludeArchesList = data.arch
       excludeUpgradesList = data.upgrade
       excludeVariantsList = data.variant
+
       console.log('variables are set')
-      console.log(excludeNetworksList)
-      console.log(excludeCloudsList)
-      console.log(excludeArchesList)
-      console.log(excludeUpgradesList)
-      console.log(excludeVariantsList)
+
+      return {
+        excludeNetworksList,
+        excludeCloudsList,
+        excludeArchesList,
+        excludeUpgradesList,
+        excludeVariantsList,
+      }
     })
     .catch((error) => {
       console.error('Error loading variables via sippy api', error)
       throw error
     })
 }
+
+const MemoizedFetchExcludeVars = () => useMemo(() => fetchExcludeVars(), [])
+
+export default MemoizedFetchExcludeVars
 
 // Take a string that is an "environment" (environment is a list of strings that describe
 // items in one or more of the lists above) and split it up so that it can be used in
@@ -287,11 +300,11 @@ export function expandEnvironment(environmentStr) {
   }
   fetchExcludeVars()
   console.log('expanding now')
-  console.log(excludeNetworksList)
-  console.log(excludeCloudsList)
-  console.log(excludeArchesList)
-  console.log(excludeUpgradesList)
-  console.log(excludeVariantsList)
+  // console.log('var: ', excludeNetworksList)
+  // console.log('var: ', excludeCloudsList)
+  // console.log('var: ', excludeArchesList)
+  // console.log('var: ', excludeUpgradesList)
+  // console.log('var: ', excludeVariantsList)
   const items = environmentStr.split(' ')
   const params = {}
   items.forEach((item) => {
@@ -307,6 +320,11 @@ export function expandEnvironment(environmentStr) {
       params.variant = item
     } else {
       console.log(`Warning: Item '${item}' not found in lists`)
+      console.log('var: ', excludeNetworksList)
+      console.log('var: ', excludeCloudsList)
+      console.log('var: ', excludeArchesList)
+      console.log('var: ', excludeUpgradesList)
+      console.log('var: ', excludeVariantsList)
     }
   })
   const paramStrings = Object.entries(params).map(

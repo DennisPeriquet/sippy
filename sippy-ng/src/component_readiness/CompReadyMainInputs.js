@@ -7,10 +7,8 @@ import {
   excludeNetworksList,
   excludeUpgradesList,
   excludeVariantsList,
-  fetchExcludeVars,
   formatLongDate,
   formatLongEndDate,
-  getAPIUrl,
   getUpdatedUrlParts,
   groupByList,
 } from './CompReadyUtils'
@@ -66,10 +64,6 @@ export default function CompReadyMainInputs(props) {
     setIgnoreMissing,
     setIgnoreDisruption,
   } = props
-
-  useEffect(() => {
-    fetchExcludeVars()
-  }, [])
 
   return (
     <Fragment>

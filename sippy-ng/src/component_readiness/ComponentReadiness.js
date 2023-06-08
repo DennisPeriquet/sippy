@@ -9,6 +9,7 @@ import {
 } from 'use-query-params'
 import {
   cancelledDataTable,
+  fetchExcludeVars,
   formatLongDate,
   formatLongEndDate,
   formColumnName,
@@ -312,6 +313,16 @@ export default function ComponentReadiness(props) {
   useEffect(() => {
     setData(initialPageTable)
     setIsLoaded(true)
+  }, [])
+
+  const [excludeVars, setExcludeVars] = useState(null)
+
+  useEffect(() => {
+    fetchExcludeVars()
+      .then((vars) => setExcludeVars(vars))
+      .catch((error) => {
+        console.error('Failed to fetch exclude vars', error)
+      })
   }, [])
 
   document.title = `Sippy > Component Readiness`
