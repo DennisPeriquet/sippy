@@ -701,6 +701,53 @@ export default function ComponentReadiness(props) {
                     <CompReadyEnvCapabilities
                       filterVals={filterVals}
                       component={component}
+                      useStyles={useStyles}
+                      baseRelease={baseRelease}
+                      baseStartTime={formatLongDate(baseStartTime)}
+                      baseEndTime={formatLongEndDate(baseEndTime)}
+                      sampleRelease={sampleRelease}
+                      sampleStartTime={formatLongDate(sampleStartTime)}
+                      sampleEndTime={formatLongEndDate(sampleEndTime)}
+                      groupByCheckedItems={groupByCheckedItems}
+                      excludeCloudsCheckedItems={excludeCloudsCheckedItems}
+                      excludeArchesCheckedItems={excludeArchesCheckedItems}
+                      excludeNetworksCheckedItems={excludeNetworksCheckedItems}
+                      excludeUpgradesCheckedItems={excludeUpgradesCheckedItems}
+                      excludeVariantsCheckedItems={excludeVariantsCheckedItems}
+                      confidence={confidence}
+                      pity={pity}
+                      minFail={minFail}
+                      ignoreMissing={ignoreMissing}
+                      ignoreDisruption={ignoreDisruption}
+                      environment={environment}
+                      setBaseRelease={setBaseRelease}
+                      setSampleRelease={setSampleRelease}
+                      setBaseStartTime={setBaseStartTime}
+                      setBaseEndTime={setBaseEndTime}
+                      setSampleStartTime={setSampleStartTime}
+                      setSampleEndTime={setSampleEndTime}
+                      setGroupByCheckedItems={setGroupByCheckedItems}
+                      setExcludeArchesCheckedItems={
+                        setExcludeArchesCheckedItems
+                      }
+                      setExcludeNetworksCheckedItems={
+                        setExcludeNetworksCheckedItems
+                      }
+                      setExcludeCloudsCheckedItems={
+                        setExcludeCloudsCheckedItems
+                      }
+                      setExcludeUpgradesCheckedItems={
+                        setExcludeUpgradesCheckedItems
+                      }
+                      setExcludeVariantsCheckedItems={
+                        setExcludeVariantsCheckedItems
+                      }
+                      handleGenerateReport={handleGenerateReport}
+                      setConfidence={setConfidence}
+                      setPity={setPity}
+                      setMinFail={setMinFail}
+                      setIgnoreMissing={setIgnoreMissing}
+                      setIgnoreDisruption={setIgnoreDisruption}
                     ></CompReadyEnvCapabilities>
                   )
                 }}
@@ -735,6 +782,52 @@ export default function ComponentReadiness(props) {
                       filterVals={filterVals}
                       component={component}
                       environment={environment}
+                      useStyles={useStyles}
+                      baseRelease={baseRelease}
+                      baseStartTime={formatLongDate(baseStartTime)}
+                      baseEndTime={formatLongEndDate(baseEndTime)}
+                      sampleRelease={sampleRelease}
+                      sampleStartTime={formatLongDate(sampleStartTime)}
+                      sampleEndTime={formatLongEndDate(sampleEndTime)}
+                      groupByCheckedItems={groupByCheckedItems}
+                      excludeCloudsCheckedItems={excludeCloudsCheckedItems}
+                      excludeArchesCheckedItems={excludeArchesCheckedItems}
+                      excludeNetworksCheckedItems={excludeNetworksCheckedItems}
+                      excludeUpgradesCheckedItems={excludeUpgradesCheckedItems}
+                      excludeVariantsCheckedItems={excludeVariantsCheckedItems}
+                      confidence={confidence}
+                      pity={pity}
+                      minFail={minFail}
+                      ignoreMissing={ignoreMissing}
+                      ignoreDisruption={ignoreDisruption}
+                      setBaseRelease={setBaseRelease}
+                      setSampleRelease={setSampleRelease}
+                      setBaseStartTime={setBaseStartTime}
+                      setBaseEndTime={setBaseEndTime}
+                      setSampleStartTime={setSampleStartTime}
+                      setSampleEndTime={setSampleEndTime}
+                      setGroupByCheckedItems={setGroupByCheckedItems}
+                      setExcludeArchesCheckedItems={
+                        setExcludeArchesCheckedItems
+                      }
+                      setExcludeNetworksCheckedItems={
+                        setExcludeNetworksCheckedItems
+                      }
+                      setExcludeCloudsCheckedItems={
+                        setExcludeCloudsCheckedItems
+                      }
+                      setExcludeUpgradesCheckedItems={
+                        setExcludeUpgradesCheckedItems
+                      }
+                      setExcludeVariantsCheckedItems={
+                        setExcludeVariantsCheckedItems
+                      }
+                      handleGenerateReport={null}
+                      setConfidence={setConfidence}
+                      setPity={setPity}
+                      setMinFail={setMinFail}
+                      setIgnoreMissing={setIgnoreMissing}
+                      setIgnoreDisruption={setIgnoreDisruption}
                     ></CompReadyEnvCapabilities>
                   )
                 }}
