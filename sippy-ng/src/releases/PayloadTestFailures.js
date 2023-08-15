@@ -55,7 +55,11 @@ function PayloadTestFailures(props) {
               /* Assume the jobs and job runs are the same length and match positionally */
               pl.push(
                 <Fragment>
-                  <a href={params.value[key].failed_job_runs[i]}>
+                  <a
+                    href={params.value[key].failed_job_runs[i]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     {params.value[key].failed_jobs[i] + '  '}
                   </a>
                   <br />
