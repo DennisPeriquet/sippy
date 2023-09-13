@@ -79,6 +79,7 @@ export default function CompReadyTestDetailRow(props) {
                 return (
                   <a
                     href={jobRun.job_url}
+                    target="_blank"
                     key={jobRunIndex}
                     style={{
                       color: getJobRunColor(jobRun),
