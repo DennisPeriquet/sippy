@@ -616,6 +616,9 @@ func (s *Server) jsonComponentTestVariantsFromBigQuery(w http.ResponseWriter, re
 		return
 	}
 	outputs, errs := api.GetComponentTestVariantsFromBigQuery(s.bigQueryClient)
+	if len(errs) == 0 {
+		errs = []error{fmt.Errorf("simulated error from /variant path")}
+	}
 	if len(errs) > 0 {
 		log.Warningf("%d errors were encountered while querying test variants from big query:", len(errs))
 		for _, err := range errs {
@@ -623,7 +626,7 @@ func (s *Server) jsonComponentTestVariantsFromBigQuery(w http.ResponseWriter, re
 		}
 		api.RespondWithJSON(http.StatusInternalServerError, w, map[string]interface{}{
 			"code":    http.StatusInternalServerError,
-			"message": "error querying test variants from big query",
+			"message": fmt.Sprintf("error querying test variants from big query: %v", errs),
 		})
 		return
 	}

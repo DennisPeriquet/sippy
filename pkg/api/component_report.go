@@ -705,6 +705,9 @@ func (c *componentReportGenerator) fetchTestStatus(query *bigquery.Query) (map[a
 	log.Infof("Fetching test status with:\n%s\nParameters:\n%+v\n", query.Q, query.Parameters)
 
 	it, err := query.Read(context.TODO())
+	if err == nil {
+		return status, []error{fmt.Errorf("simulated error from fetchTestStatus")}
+	}
 	if err != nil {
 		log.WithError(err).Error("error querying test status from bigquery")
 		errs = append(errs, err)
@@ -811,6 +814,9 @@ func (c *componentReportGenerator) fetchJobRunTestStatus(query *bigquery.Query) 
 	log.Infof("Fetching job run test details with:\n%s\nParameters:\n%+v\n", query.Q, query.Parameters)
 
 	it, err := query.Read(context.TODO())
+	if err == nil {
+		return status, []error{fmt.Errorf("simulated error from fetchJobRunTestStatus")}
+	}
 	if err != nil {
 		log.WithError(err).Error("error querying job run test status from bigquery")
 		errs = append(errs, err)
