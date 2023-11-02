@@ -1,4 +1,9 @@
-import { dateEndFormat, dateFormat, formatLongDate } from './CompReadyUtils'
+import {
+  dateEndFormat,
+  dateFormat,
+  formatLongDate,
+  formatLongEndDate,
+} from './CompReadyUtils'
 import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
 import { Filter1, Filter2, Filter4, LocalShipping } from '@material-ui/icons'
 import {
@@ -113,7 +118,7 @@ function ReleaseSelector(props) {
               ampm={false}
               value={startTime}
               onChange={(e) => {
-                const formattedTime = formatLongDate(e, dateFormat)
+                const formattedTime = formatLongDate(e)
                 setStartTime(formattedTime)
               }}
             />
@@ -127,7 +132,7 @@ function ReleaseSelector(props) {
               ampm={false}
               value={endTime}
               onChange={(e) => {
-                const formattedTime = formatLongDate(e, dateEndFormat)
+                const formattedTime = formatLongEndDate(e)
                 setEndTime(formattedTime)
               }}
             />

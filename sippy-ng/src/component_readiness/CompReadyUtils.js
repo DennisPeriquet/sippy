@@ -14,7 +14,28 @@ export const debugMode = false
 
 // Make the HH:mm:ss as zeros to be more conducive to caching query caching.
 export const dateFormat = 'yyyy-MM-dd 00:00:00'
+
+// // Get the current date and time
+// const currentDate = new Date()
+
+// // Calculate the time portion based on the timezone offset
+// const timeZoneOffsetHours = currentDate.getTimezoneOffset() / 60
+// const timeZoneOffsetMinutes = currentDate.getTimezoneOffset() % 60
+
+// // Adjust the time portion based on the offset
+// const hours = 23 - timeZoneOffsetHours
+// const minutes = 59 - timeZoneOffsetMinutes
+// const seconds = 59
+
+// // Create the dateEndFormat string with the adjusted time
+// export const dateEndFormat1 = `yyyy-MM-dd ${hours
+//   .toString()
+//   .padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds
+//   .toString()
+//   .padStart(2, '0')}`
+
 export const dateEndFormat = 'yyyy-MM-dd 23:59:59'
+console.log('format: ', dateEndFormat)
 
 // This is the table we use when the first page is initially rendered.
 export const initialPageTable = {
@@ -231,14 +252,31 @@ export function makeRFC3339Time(aUrlStr) {
 
 // Return a formatted date given a long form date from the date picker.
 export function formatLongDate(aLongDateStr) {
-  const dateObj = new Date(aLongDateStr)
+  let dateObj
+  const typeOfDateStr = typeof aLongDateStr
+  if (typeOfDateStr == 'string' || typeOfDateStr == 'number') {
+    dateObj = new Date(aLongDateStr)
+  } else if (typeOfDateStr == 'object') {
+    dateObj = aLongDateStr
+  } else {
+    console.log('Error: unknown date format: ', typeof aLongDateStr)
+  }
   const ret = format(dateObj, dateFormat)
   return ret
 }
-
 export function formatLongEndDate(aLongDateStr) {
-  const dateObj = new Date(aLongDateStr)
+  let dateObj
+  const typeOfDateStr = typeof aLongDateStr
+  if (typeOfDateStr == 'string' || typeOfDateStr == 'number') {
+    dateObj = new Date(aLongDateStr)
+  } else if (typeOfDateStr == 'object') {
+    dateObj = aLongDateStr
+  } else {
+    console.log('Error: unknown date format: ', typeof aLongDateStr)
+  }
+  console.log('about to call format')
   const ret = format(dateObj, dateEndFormat)
+  console.log('  called call format')
   return ret
 }
 
@@ -270,10 +308,8 @@ export function getUpdatedUrlParts(
   const valuesMap = {
     baseRelease: baseRelease,
     baseStartTime: formatLongDate(baseStartTime),
-    baseEndTime: formatLongEndDate(baseEndTime),
     sampleRelease: sampleRelease,
     sampleStartTime: formatLongDate(sampleStartTime),
-    sampleEndTime: formatLongEndDate(sampleEndTime),
     confidence: confidence,
     pity: pity,
     minFail: minFail,
@@ -291,6 +327,11 @@ export function getUpdatedUrlParts(
     groupBy: groupByCheckedItems,
   }
 
+  const endTimesMap = {
+    baseEndTime: baseEndTime,
+    sampleEndTime: sampleEndTime,
+  }
+
   const queryParams = new URLSearchParams()
 
   // Render the plain values first.
@@ -302,6 +343,15 @@ export function getUpdatedUrlParts(
   Object.entries(arraysMap).forEach(([key, value]) => {
     if (value && value.length) {
       queryParams.append(key, value.join(','))
+    }
+  })
+
+  // Render end times so they cover all the way to the end of the given day.
+  // We do this here (when generating the api call) to ensure that we're using
+  // the intended value in UTC).
+  Object.entries(endTimesMap).forEach(([key, value]) => {
+    if (value && value.length) {
+      queryParams.append(key, value.replace('00:00:00', '23:59:59'))
     }
   })
 

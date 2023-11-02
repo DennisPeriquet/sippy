@@ -58,6 +58,7 @@ import CompReadyTestReport from './CompReadyTestReport'
 import IconButton from '@material-ui/core/IconButton'
 import MenuIcon from '@material-ui/icons/Menu'
 import React from 'react'
+import ReleaseSelector from './ReleaseSelector'
 import Table from '@material-ui/core/Table'
 import TableBody from '@material-ui/core/TableBody'
 import TableCell from '@material-ui/core/TableCell'
@@ -541,6 +542,29 @@ export default function ComponentReadiness(props) {
                       testId={testId}
                       testName={testName}
                     ></CompReadyTestReport>
+                  )
+                }}
+              />
+
+              <Route
+                path="/component_readiness/ccr_test"
+                render={(props) => {
+                  console.log('sampleStartTime ccr_test:', sampleStartTime)
+                  console.log('sampleEndTime ccr_test:', sampleEndTime)
+                  return (
+                    <Fragment>
+                      <div className="cr-release-sample">
+                        <ReleaseSelector
+                          label="Test to Evaluate"
+                          version={'4.14'}
+                          onChange={setSampleReleaseWithDates}
+                          startTime={sampleStartTime}
+                          setStartTime={setSampleStartTime}
+                          endTime={sampleEndTime}
+                          setEndTime={setSampleEndTime}
+                        ></ReleaseSelector>
+                      </div>
+                    </Fragment>
                   )
                 }}
               />
