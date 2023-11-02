@@ -14,7 +14,11 @@ export const debugMode = false
 
 // Make the HH:mm:ss as zeros to be more conducive to caching query caching.
 export const dateFormat = 'yyyy-MM-dd 00:00:00'
-export const dateEndFormat = 'yyyy-MM-dd 23:59:59'
+
+// The date picker says anything beyond 19:59:59 in the Eastern Time zone is rounded
+// to the next day.
+//export const dateEndFormat = 'yyyy-MM-dd 19:59:59'
+export const dateEndFormat = 'yyyy-MM-dd 00:00:00'
 
 // This is the table we use when the first page is initially rendered.
 export const initialPageTable = {
@@ -231,14 +235,40 @@ export function makeRFC3339Time(aUrlStr) {
 
 // Return a formatted date given a long form date from the date picker.
 export function formatLongDate(aLongDateStr) {
+  console.log('Type of aLongDateStr:', typeof aLongDateStr)
+  console.log('formatLongDate, aLongDateStr: ', aLongDateStr)
+
+  // if we're already formatted, just return the same value.
+  if (
+    typeof aLongDateStr == 'string' &&
+    aLongDateStr.length === dateFormat.length
+  ) {
+    console.log('  ret1: ', aLongDateStr)
+    return aLongDateStr
+  }
+
   const dateObj = new Date(aLongDateStr)
   const ret = format(dateObj, dateFormat)
+  console.log('  ret: ', ret)
   return ret
 }
 
 export function formatLongEndDate(aLongDateStr) {
+  console.log('Type of aLongEndDateStr:', typeof aLongDateStr)
+  console.log('formatLongEndDate, aLongDateStr: ', aLongDateStr)
+
+  // if we're already formatted, just return the same value.
+  if (
+    typeof aLongDateStr == 'string' &&
+    aLongDateStr.length === dateEndFormat.length
+  ) {
+    const ret = aLongDateStr.replace('00:00:00', '23:59:59')
+    console.log('  ret1: ', ret)
+    return ret
+  }
   const dateObj = new Date(aLongDateStr)
   const ret = format(dateObj, dateEndFormat)
+  console.log('  ret: ', ret)
   return ret
 }
 
