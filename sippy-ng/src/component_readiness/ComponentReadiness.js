@@ -9,8 +9,9 @@ import {
 } from 'use-query-params'
 import {
   cancelledDataTable,
+  dateEndFormat,
+  dateFormat,
   formatLongDate,
-  formatLongEndDate,
   formColumnName,
   getAPIUrl,
   getColumns,
@@ -166,15 +167,15 @@ export default function ComponentReadiness(props) {
     let endTime = getReleaseDate(release)
     let startTime = endTime.getTime() - 30 * days
     setBaseRelease(release)
-    setBaseStartTime(formatLongDate(startTime))
-    setBaseEndTime(formatLongDate(endTime))
+    setBaseStartTime(formatLongDate(startTime, dateFormat))
+    setBaseEndTime(formatLongDate(endTime, dateEndFormat))
   }
 
   const setSampleReleaseWithDates = (event) => {
     let release = event.target.value
     setSampleRelease(release)
-    setSampleStartTime(formatLongDate(initialSampleStartTime))
-    setSampleEndTime(formatLongDate(initialSampleEndTime))
+    setSampleStartTime(formatLongDate(initialSampleStartTime, dateFormat))
+    setSampleEndTime(formatLongDate(initialSampleEndTime, dateEndFormat))
   }
 
   //console.log('ComponentReadiness start')
@@ -210,11 +211,11 @@ export default function ComponentReadiness(props) {
   const [baseReleaseParam = defaultBaseRelease, setBaseReleaseParam] =
     useQueryParam('baseRelease', StringParam)
   const [
-    baseStartTimeParam = formatLongDate(initialBaseStartTime),
+    baseStartTimeParam = formatLongDate(initialBaseStartTime, dateFormat),
     setBaseStartTimeParam,
   ] = useQueryParam('baseStartTime', StringParam)
   const [
-    baseEndTimeParam = formatLongDate(initialBaseEndTime),
+    baseEndTimeParam = formatLongDate(initialBaseEndTime, dateEndFormat),
     setBaseEndTimeParam,
   ] = useQueryParam('baseEndTime', StringParam)
   const [sampleReleaseParam = '4.15', setSampleReleaseParam] = useQueryParam(
@@ -222,11 +223,11 @@ export default function ComponentReadiness(props) {
     StringParam
   )
   const [
-    sampleStartTimeParam = formatLongDate(initialSampleStartTime),
+    sampleStartTimeParam = formatLongDate(initialSampleStartTime, dateFormat),
     setSampleStartTimeParam,
   ] = useQueryParam('sampleStartTime', StringParam)
   const [
-    sampleEndTimeParam = formatLongDate(initialSampleEndTime),
+    sampleEndTimeParam = formatLongDate(initialSampleEndTime, dateEndFormat),
     setSampleEndTimeParam,
   ] = useQueryParam('sampleEndTime', StringParam)
   const [
@@ -449,11 +450,11 @@ export default function ComponentReadiness(props) {
   const handleGenerateReport = (event) => {
     event.preventDefault()
     setBaseReleaseParam(baseRelease)
-    setBaseStartTimeParam(formatLongDate(baseStartTime))
-    setBaseEndTimeParam(formatLongDate(baseEndTime))
+    setBaseStartTimeParam(formatLongDate(baseStartTime, dateFormat))
+    setBaseEndTimeParam(formatLongDate(baseEndTime, dateEndFormat))
     setSampleReleaseParam(sampleRelease)
-    setSampleStartTimeParam(formatLongDate(sampleStartTime))
-    setSampleEndTimeParam(formatLongDate(sampleEndTime))
+    setSampleStartTimeParam(formatLongDate(sampleStartTime, dateFormat))
+    setSampleEndTimeParam(formatLongDate(sampleEndTime, dateEndFormat))
     setGroupByCheckedItemsParam(groupByCheckedItems)
     setExcludeCloudsCheckedItemsParam(excludeCloudsCheckedItems)
     setExcludeArchesCheckedItemsParam(excludeArchesCheckedItems)
@@ -787,11 +788,17 @@ export default function ComponentReadiness(props) {
                     </div>
                     <CompReadyMainInputs
                       baseRelease={baseRelease}
-                      baseStartTime={formatLongDate(baseStartTime)}
-                      baseEndTime={formatLongEndDate(baseEndTime)}
+                      baseStartTime={formatLongDate(baseStartTime, dateFormat)}
+                      baseEndTime={formatLongDate(baseEndTime, dateEndFormat)}
                       sampleRelease={sampleRelease}
-                      sampleStartTime={formatLongDate(sampleStartTime)}
-                      sampleEndTime={formatLongEndDate(sampleEndTime)}
+                      sampleStartTime={formatLongDate(
+                        sampleStartTime,
+                        dateFormat
+                      )}
+                      sampleEndTime={formatLongDate(
+                        sampleEndTime,
+                        dateEndFormat
+                      )}
                       groupByCheckedItems={groupByCheckedItems}
                       excludeCloudsCheckedItems={excludeCloudsCheckedItems}
                       excludeArchesCheckedItems={excludeArchesCheckedItems}

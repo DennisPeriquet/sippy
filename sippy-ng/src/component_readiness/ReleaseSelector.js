@@ -1,4 +1,9 @@
-import { dateEndFormat, dateFormat, formatLongDate } from './CompReadyUtils'
+import {
+  dateEndFormat,
+  dateFormat,
+  formatLongDate,
+  ReleaseSelectorDateUtils,
+} from './CompReadyUtils'
 import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
 import { Filter1, Filter2, Filter4, LocalShipping } from '@material-ui/icons'
 import {
@@ -10,7 +15,6 @@ import {
   Tooltip,
 } from '@material-ui/core'
 import { Fragment, useContext, useEffect } from 'react'
-import { GridToolbarFilterDateUtils } from '../datagrid/GridToolbarFilterDateUtils'
 import { makeStyles } from '@material-ui/core/styles'
 import { ReleasesContext } from '../App'
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
@@ -53,8 +57,10 @@ function ReleaseSelector(props) {
 
   const setGADate = () => {
     let start = new Date(versions[version])
-    setStartTime(formatLongDate(start.setDate(start.getDate() - 28)))
-    setEndTime(formatLongDate(versions[version]))
+    setStartTime(
+      formatLongDate(start.setDate(start.getDate() - 28), dateFormat)
+    )
+    setEndTime(formatLongDate(versions[version]), dateEndFormat)
   }
 
   const set4Weeks = () => {
@@ -104,7 +110,7 @@ function ReleaseSelector(props) {
               ))}
             </Select>
           </FormControl>
-          <MuiPickersUtilsProvider utils={GridToolbarFilterDateUtils}>
+          <MuiPickersUtilsProvider utils={ReleaseSelectorDateUtils}>
             <DatePicker
               showTodayButton
               disableFuture
@@ -118,7 +124,7 @@ function ReleaseSelector(props) {
               }}
             />
           </MuiPickersUtilsProvider>
-          <MuiPickersUtilsProvider utils={GridToolbarFilterDateUtils}>
+          <MuiPickersUtilsProvider utils={ReleaseSelectorDateUtils}>
             <DatePicker
               showTodayButton
               disableFuture

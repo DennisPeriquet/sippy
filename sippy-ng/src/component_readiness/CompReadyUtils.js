@@ -1,6 +1,7 @@
 import { Alert } from '@material-ui/lab'
-import { format } from 'date-fns'
+import { format, utcToZonedTime } from 'date-fns-tz'
 import { Typography } from '@material-ui/core'
+import DateFnsUtils from '@date-io/date-fns'
 import green from './green-3.png'
 import green_half_data from './green-half-data.png'
 import green_missing_data from './green_no_data.png'
@@ -230,15 +231,22 @@ export function makeRFC3339Time(aUrlStr) {
 }
 
 // Return a formatted date given a long form date from the date picker.
-export function formatLongDate(aLongDateStr) {
-  const dateObj = new Date(aLongDateStr)
-  const ret = format(dateObj, dateFormat)
-  return ret
-}
-
-export function formatLongEndDate(aLongDateStr) {
-  const dateObj = new Date(aLongDateStr)
-  const ret = format(dateObj, dateEndFormat)
+// The given date can be either a long string (from the DatePicker),
+// a number (epoch time from when we initialized the start times), or
+// a Date object (when called from an event handler function).
+export function formatLongDate(aLongDate, aDateFormat) {
+  let dateObj
+  const typeOfLongDate = typeof aLongDate
+  if (typeOfLongDate == 'string' || typeOfLongDate == 'number') {
+    dateObj = new Date(aLongDate)
+  } else if (typeOfLongDate == 'object') {
+    dateObj = aLongDate
+  } else {
+    // This should never happen, but if it does, try to recover.
+    console.log('Error: unknown date format: ', typeof aLongDate)
+    dateObj = new Date(aLongDate)
+  }
+  const ret = format(dateObj, aDateFormat)
   return ret
 }
 
@@ -269,11 +277,11 @@ export function getUpdatedUrlParts(
 ) {
   const valuesMap = {
     baseRelease: baseRelease,
-    baseStartTime: formatLongDate(baseStartTime),
-    baseEndTime: formatLongEndDate(baseEndTime),
+    baseStartTime: formatLongDate(baseStartTime, dateFormat),
+    baseEndTime: formatLongDate(baseEndTime, dateEndFormat),
     sampleRelease: sampleRelease,
-    sampleStartTime: formatLongDate(sampleStartTime),
-    sampleEndTime: formatLongEndDate(sampleEndTime),
+    sampleStartTime: formatLongDate(sampleStartTime, dateFormat),
+    sampleEndTime: formatLongDate(sampleEndTime, dateEndFormat),
     confidence: confidence,
     pity: pity,
     minFail: minFail,
@@ -381,4 +389,26 @@ export function getKeeperColumns(data, columnNames, redOnlyChecked) {
     })
   })
   return keepColumnList
+}
+
+export class ReleaseSelectorDateUtils extends DateFnsUtils {
+  constructor() {
+    super()
+  }
+
+  getHours(date) {
+    return date.getUTCHours()
+  }
+
+  getMinutes(date) {
+    return date.getUTCMinutes()
+  }
+
+  // Used by the ReleaseSelector in ComponentReadiness
+  format(date, formatString) {
+    return `${format(date, formatString, {
+      timeZone: 'Etc/UTC',
+      locale: this.locale,
+    })}`
+  }
 }
