@@ -10,11 +10,15 @@ import red from './red-3.png'
 import red_3d from './red-3d.png'
 
 // Set to true for debug mode
-export const debugMode = false
+export const debugMode = true
 
 // Make the HH:mm:ss as zeros to be more conducive to caching query caching.
 export const dateFormat = 'yyyy-MM-dd 00:00:00'
-export const dateEndFormat = 'yyyy-MM-dd 23:59:59'
+
+// Don't consider time for the end date to avoid time zone calculations.  We
+// always use 23:59:59 (to ensure we capture the entire day) when we pass this
+// to the api.
+export const dateEndFormat = 'yyyy-MM-dd 00:00:00'
 
 // This is the table we use when the first page is initially rendered.
 export const initialPageTable = {
@@ -270,10 +274,8 @@ export function getUpdatedUrlParts(
   const valuesMap = {
     baseRelease: baseRelease,
     baseStartTime: formatLongDate(baseStartTime),
-    baseEndTime: formatLongEndDate(baseEndTime),
     sampleRelease: sampleRelease,
     sampleStartTime: formatLongDate(sampleStartTime),
-    sampleEndTime: formatLongEndDate(sampleEndTime),
     confidence: confidence,
     pity: pity,
     minFail: minFail,
@@ -291,6 +293,11 @@ export function getUpdatedUrlParts(
     groupBy: groupByCheckedItems,
   }
 
+  const endTimesMap = {
+    baseEndTime: baseEndTime,
+    sampleEndTime: sampleEndTime,
+  }
+
   const queryParams = new URLSearchParams()
 
   // Render the plain values first.
@@ -305,6 +312,19 @@ export function getUpdatedUrlParts(
     }
   })
 
+  // Render end times so they cover all the way to the end of the given day.
+  // We do this here (when generating the api call) to ensure that we're using
+  // the intended value in UTC).
+  Object.entries(endTimesMap).forEach(([key, value]) => {
+    if (value && value.length) {
+      console.log('value: ', value)
+      const apiVal = value.replace(' 00:00:00', '')
+      console.log('apiVal: ', apiVal)
+      queryParams.append(key, apiVal + 'T23:59:59Z')
+      console.log(key, ': ', apiVal + 'T23:59:59Z')
+    }
+  })
+
   // Stringify and put the begin param character.
   queryParams.sort() // ensure they always stay in sorted order to prevent url history changes
 
@@ -315,6 +335,74 @@ export function getUpdatedUrlParts(
   const retVal = `?${queryString}`
   return retVal
 }
+
+// export function getUpdatedUrlParts(
+//   baseRelease,
+//   baseStartTime,
+//   baseEndTime,
+//   sampleRelease,
+//   sampleStartTime,
+//   sampleEndTime,
+//   groupByCheckedItems,
+//   excludeCloudsCheckedItems,
+//   excludeArchesCheckedItems,
+//   excludeNetworksCheckedItems,
+//   excludeUpgradesCheckedItems,
+//   excludeVariantsCheckedItems,
+//   confidence,
+//   pity,
+//   minFail,
+//   ignoreDisruption,
+//   ignoreMissing
+// ) {
+//   const valuesMap = {
+//     baseRelease: baseRelease,
+//     baseStartTime: formatLongDate(baseStartTime),
+//     baseEndTime: formatLongEndDate(baseEndTime),
+//     sampleRelease: sampleRelease,
+//     sampleStartTime: formatLongDate(sampleStartTime),
+//     sampleEndTime: formatLongEndDate(sampleEndTime),
+//     confidence: confidence,
+//     pity: pity,
+//     minFail: minFail,
+//     ignoreDisruption: ignoreDisruption,
+//     ignoreMissing: ignoreMissing,
+//     //component: component,
+//   }
+
+//   const arraysMap = {
+//     excludeClouds: excludeCloudsCheckedItems,
+//     excludeArches: excludeArchesCheckedItems,
+//     excludeNetworks: excludeNetworksCheckedItems,
+//     excludeUpgrades: excludeUpgradesCheckedItems,
+//     excludeVariants: excludeVariantsCheckedItems,
+//     groupBy: groupByCheckedItems,
+//   }
+
+//   const queryParams = new URLSearchParams()
+
+//   // Render the plain values first.
+//   Object.entries(valuesMap).forEach(([key, value]) => {
+//     queryParams.append(key, value)
+//   })
+
+//   // Render the array values.
+//   Object.entries(arraysMap).forEach(([key, value]) => {
+//     if (value && value.length) {
+//       queryParams.append(key, value.join(','))
+//     }
+//   })
+
+//   // Stringify and put the begin param character.
+//   queryParams.sort() // ensure they always stay in sorted order to prevent url history changes
+
+//   // When using URLSearchParams to construct a query string, it follows the application/x-www-form-urlencoded format,
+//   // which uses + to represent space characters. The rest of Sippy uses the URI encoding tools in JS, which relies on
+//   // %20 for spaces. This makes URL's change, which creates additional history entries, and breaks the back button.
+//   const queryString = queryParams.toString().replace(/\+/g, '%20')
+//   const retVal = `?${queryString}`
+//   return retVal
+// }
 
 // sortQueryParams sorts a query parameters order so we don't screw up the history when they change
 export function sortQueryParams(path) {
