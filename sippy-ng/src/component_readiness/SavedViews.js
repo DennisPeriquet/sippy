@@ -1,3 +1,4 @@
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material'
 import PropTypes from 'prop-types'
 import React, { useState } from 'react'
 
@@ -14,17 +15,22 @@ export default function SavedViews(props) {
   }
 
   return (
-    <div>
-      <label htmlFor="saved-views-dropdown">Selected View</label>
-      <select value={selectedView} onChange={handleChange}>
-        <option value="Default">Default</option>
+    <FormControl fullWidth>
+      <InputLabel id="saved-views-label">Selected View</InputLabel>
+      <Select
+        labelId="saved-views-label"
+        id="saved-views-select"
+        value={selectedView}
+        label="Selected View"
+        onChange={handleChange}
+      >
         {views.map((view) => (
-          <option key={view.id} value={view.name}>
+          <MenuItem key={view.id} value={view.name}>
             {view.name}
-          </option>
+          </MenuItem>
         ))}
-      </select>
-    </div>
+      </Select>
+    </FormControl>
   )
 }
 

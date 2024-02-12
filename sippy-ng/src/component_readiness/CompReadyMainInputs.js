@@ -39,24 +39,24 @@ export default function CompReadyMainInputs(props) {
 
   const [views, setViews] = useState([
     {
-      id: 'default',
+      id: 'Default',
       name: 'Default',
       config: {
-        /* ...default config */
+        /* ...Default config */
       },
     },
     {
-      id: 'view1',
-      name: 'view1',
+      id: 'View1',
+      name: 'View1',
       config: {
-        /* ...view1 config */
+        /* ...View1 config */
       },
     },
     {
-      id: 'view2',
-      name: 'view2',
+      id: 'View2',
+      name: 'View2',
       config: {
-        /* ...view2 config */
+        /* ...View2 config */
       },
     },
   ])
