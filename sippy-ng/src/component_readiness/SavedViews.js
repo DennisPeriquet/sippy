@@ -15,6 +15,7 @@ export default function SavedViews(props) {
 
   return (
     <div>
+      <label htmlFor="saved-views-dropdown">Selected View</label>
       <select value={selectedView} onChange={handleChange}>
         <option value="Default">Default</option>
         {views.map((view) => (
