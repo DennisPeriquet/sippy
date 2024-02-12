@@ -96,13 +96,13 @@ export const CompReadyVarsProvider = ({ children }) => {
     setSampleEndTimeParam,
   ] = useQueryParam('sampleEndTime', StringParam)
 
-  const groupByCheckedItemsDefault = ['cloud', 'arch', 'network']
+  const defaultGroupByCheckedItems = ['cloud', 'arch', 'network']
   const [
-    groupByCheckedItemsParam = groupByCheckedItemsDefault,
+    groupByCheckedItemsParam = defaultGroupByCheckedItems,
     setGroupByCheckedItemsParam,
   ] = useQueryParam('groupBy', ArrayParam)
 
-  const excludeCloudsCheckedItemsDefault = [
+  const defaultExcludeCloudsCheckedItems = [
     'openstack',
     'ibmcloud',
     'libvirt',
@@ -110,34 +110,34 @@ export const CompReadyVarsProvider = ({ children }) => {
     'unknown',
   ]
   const [
-    excludeCloudsCheckedItemsParam = excludeCloudsCheckedItemsDefault,
+    excludeCloudsCheckedItemsParam = defaultExcludeCloudsCheckedItems,
     setExcludeCloudsCheckedItemsParam,
   ] = useQueryParam('excludeClouds', ArrayParam)
 
-  const excludeArchesCheckedItemsDefault = [
+  const defaultExcludeArchesCheckedItems = [
     'arm64',
     'heterogeneous',
     'ppc64le',
     's390x',
   ]
   const [
-    excludeArchesCheckedItemsParam = excludeArchesCheckedItemsDefault,
+    excludeArchesCheckedItemsParam = defaultExcludeArchesCheckedItems,
     setExcludeArchesCheckedItemsParam,
   ] = useQueryParam('excludeArches', ArrayParam)
 
-  const excludeNetworksCheckedItemsDefault = []
+  const defaultExcludeNetworksCheckedItems = []
   const [
-    excludeNetworksCheckedItemsParam = excludeNetworksCheckedItemsDefault,
+    excludeNetworksCheckedItemsParam = defaultExcludeNetworksCheckedItems,
     setExcludeNetworksCheckedItemsParam,
   ] = useQueryParam('excludeNetworks', ArrayParam)
 
-  const excludeUpgradesCheckedItemsDefault = []
+  const defaultExcludeUpgradesCheckedItems = []
   const [
-    excludeUpgradesCheckedItemsParam = excludeUpgradesCheckedItemsDefault,
+    excludeUpgradesCheckedItemsParam = defaultExcludeUpgradesCheckedItems,
     setExcludeUpgradesCheckedItemsParam,
   ] = useQueryParam('excludeUpgrades', ArrayParam)
 
-  const excludeVariantsCheckedItemsDefault = [
+  const defaultExcludeVariantsCheckedItems = [
     'hypershift',
     'osd',
     'microshift',
@@ -147,34 +147,37 @@ export const CompReadyVarsProvider = ({ children }) => {
     'compact',
   ]
   const [
-    excludeVariantsCheckedItemsParam = excludeVariantsCheckedItemsDefault,
+    excludeVariantsCheckedItemsParam = defaultExcludeVariantsCheckedItems,
     setExcludeVariantsCheckedItemsParam,
   ] = useQueryParam('excludeVariants', ArrayParam)
 
-  const confidenceParamDefault = 95
-  const [confidenceParam = confidenceDefault, setConfidenceParam] = useQueryParam(
-    'confidence',
+  const defaultConfidenceParam = 95
+  const [confidenceParam = defaultConfidenceParam, setConfidenceParam] =
+    useQueryParam('confidence', NumberParam)
+
+  const defaultPityParam = 5
+  const [pityParam = defaultPityParam, setPityParam] = useQueryParam(
+    'pity',
     NumberParam
   )
 
-  const pityParamDefault = 5
-  const [pityParam = pityParamDefault, setPityParam] = useQueryParam('pity', NumberParam)
-
-  const minFailParamDefault = 3
-  const [minFailParam = minFailParamDefault, setMinFailParam] = useQueryParam(
+  const defaultMinFailParam = 3
+  const [minFailParam = defaultMinFailParam, setMinFailParam] = useQueryParam(
     'minFail',
     NumberParam
   )
 
-  const ignoreMissingParamDefault = false
-  const [ignoreMissingParam = ignoreMissingParamDefault, setIgnoreMissingParam] = useQueryParam(
-    'ignoreMissing',
-    BooleanParam
-  )
+  const defaultIgnoreMissingParam = false
+  const [
+    ignoreMissingParam = defaultIgnoreMissingParam,
+    setIgnoreMissingParam,
+  ] = useQueryParam('ignoreMissing', BooleanParam)
 
-  const ignoreDisruptionParamDefault = false
-  const [ignoreDisruptionParam = ignoreDisruptionParamDefault, setIgnoreDisruptionParam] =
-    useQueryParam('ignoreDisruption', BooleanParam)
+  const defaultIgnoreDisruptionParam = false
+  const [
+    ignoreDisruptionParam = defaultIgnoreDisruptionParam,
+    setIgnoreDisruptionParam,
+  ] = useQueryParam('ignoreDisruption', BooleanParam)
 
   // Create the variables to be used for api calls; these are initilized to the
   // value of the variables that got their values from the URL.
@@ -403,26 +406,37 @@ export const CompReadyVarsProvider = ({ children }) => {
         sampleEndTime,
         setSampleEndTime,
         groupByCheckedItems,
+        defaultGroupByCheckedItems,
         setGroupByCheckedItems,
         excludeUpgradesCheckedItems,
+        defaultExcludeUpgradesCheckedItems,
         setExcludeUpgradesCheckedItems,
         excludeVariantsCheckedItems,
+        defaultExcludeVariantsCheckedItems,
         setExcludeVariantsCheckedItems,
         excludeCloudsCheckedItems,
+        defaultExcludeCloudsCheckedItems,
         setExcludeCloudsCheckedItems,
         excludeArchesCheckedItems,
+        defaultExcludeArchesCheckedItems,
         setExcludeArchesCheckedItems,
         excludeNetworksCheckedItems,
+        defaultExcludeNetworksCheckedItems,
         setExcludeNetworksCheckedItems,
         confidence,
+        defaultConfidenceParam,
         setConfidence,
         pity,
+        defaultPityParam,
         setPity,
         minFail,
+        defaultMinFailParam,
         setMinFail,
         ignoreMissing,
+        defaultIgnoreMissingParam,
         setIgnoreMissing,
         ignoreDisruption,
+        defaultIgnoreDisruptionParam,
         setIgnoreDisruption,
         component,
         setComponentParam,

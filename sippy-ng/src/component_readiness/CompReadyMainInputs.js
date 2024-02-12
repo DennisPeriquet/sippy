@@ -1,17 +1,5 @@
 import './ComponentReadiness.css'
-import {
-  CompReadyVarsContext,
-  confidenceParamDefault,
-  excludeCloudsCheckedItemsDefault,
-  excludeNetworksCheckedItems,
-  groupByCheckedItemsDefault,
-  ignoreMissingParamDefault,
-  ignoreDisruptionParamDefault,
-  minFailParamDefault,
-  pittyParamDefault,
-  setExcludeUpgradesCheckedItemsDefault,
-  setExcludeVariantsCheckedItemsDefault,
-} from './CompReadyVars'
+import { CompReadyVarsContext } from './CompReadyVars'
 import {
   dateFormat,
   formatLongDate,
@@ -54,17 +42,17 @@ export default function CompReadyMainInputs(props) {
       id: 'Default',
       name: 'Default',
       config: {
-        'Group By': groupByCheckedItemsDefault,
-        'Exclude Arches': excludeCloudsCheckedItemsDefault,
-        'Exclude Networks': excludeNetworksCheckedItems,
-        'Exclude Clouds': excludeNetworksCheckedItems,
-        'Exclude Upgrades': setExcludeUpgradesCheckedItemsDefault,
-        'Exclude Variants': setExcludeVariantsCheckedItemsDefault,
-        'Confidence': confidenceParamDefault,
-        'Pity': pittyParamDefault,
-        'Min Fail': minFailParamDefault,
-        'Ignore Missing': ignoreMissingParamDefault,
-        'Ignore Disruption': ignoreDisruptionParamDefault,
+        'Group By': defaultGroupByCheckedItems,
+        'Exclude Arches': defaultExcludeArchesCheckedItems,
+        'Exclude Networks': defaultExcludeNetworksCheckedItems,
+        'Exclude Clouds': defaultExcludeCloudsCheckedItems,
+        'Exclude Upgrades': defaultExcludeUpgradesCheckedItems,
+        'Exclude Variants': defaultExcludeVariantsCheckedItems,
+        Confidence: defaultConfidenceParam,
+        Pity: defaultPityParam,
+        'Min Fail': defaultMinFailParam,
+        'Ignore Missing': defaultIgnoreMissingParam,
+        'Ignore Disruption': defaultIgnoreDisruptionParam,
       },
     },
     {
