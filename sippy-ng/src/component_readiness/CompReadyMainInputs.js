@@ -13,8 +13,9 @@ import AdvancedOptions from './AdvancedOptions'
 import Button from '@mui/material/Button'
 import CheckBoxList from './CheckboxList'
 import PropTypes from 'prop-types'
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import ReleaseSelector from './ReleaseSelector'
+import SavedViews from './SavedViews'
 import Tooltip from '@mui/material/Tooltip'
 
 const useStyles = makeStyles((theme) => ({
@@ -35,6 +36,51 @@ export default function CompReadyMainInputs(props) {
   const classes = useStyles(theme)
 
   const varsContext = useContext(CompReadyVarsContext)
+
+  const [views, setViews] = useState([
+    {
+      id: 'default',
+      name: 'Default',
+      config: {
+        /* ...default config */
+      },
+    },
+    {
+      id: 'view1',
+      name: 'view1',
+      config: {
+        /* ...view1 config */
+      },
+    },
+    {
+      id: 'view2',
+      name: 'view2',
+      config: {
+        /* ...view2 config */
+      },
+    },
+  ])
+
+  const handleSelectView = (view) => {
+    // Update UI and regenerate report based on the selected view
+  }
+
+  const handleDeleteView = (viewId) => {
+    // Delete view from the state and possibly from local storage/backend
+    setViews(views.filter((view) => view.id !== viewId))
+  }
+
+  const handleSaveView = (viewConfig) => {
+    // Serialize and save the view configuration
+    const newView = {
+      id: Date.now(), // or another unique identifier
+      name: `View ${views.length + 1}`,
+      config: viewConfig,
+    }
+    setViews([...views, newView])
+    // Also save to local storage/backend here
+  }
+
   return (
     <Fragment>
       <div className="cr-report-button">
@@ -100,6 +146,11 @@ export default function CompReadyMainInputs(props) {
         ></ReleaseSelector>
       </div>
       <div>
+        <SavedViews
+          views={views}
+          onSelectView={handleSelectView}
+          onDeleteView={handleDeleteView}
+        />
         <CheckBoxList
           headerName="Group By"
           displayList={groupByList}
