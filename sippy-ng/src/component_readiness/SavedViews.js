@@ -1,4 +1,12 @@
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material'
+import './SavedViews.css'
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+} from '@mui/material'
+import { makeStyles } from '@mui/styles'
 import PropTypes from 'prop-types'
 import React, { useState } from 'react'
 
@@ -15,8 +23,10 @@ export default function SavedViews(props) {
   }
 
   return (
-    <FormControl fullWidth>
-      <InputLabel id="saved-views-label">Selected View</InputLabel>
+    <FormControl variant="outlined" fullWidth>
+      <InputLabel id="saved-views-label">
+        <Typography className="savedviews-label">Selected View</Typography>
+      </InputLabel>
       <Select
         labelId="saved-views-label"
         id="saved-views-select"

@@ -1,5 +1,17 @@
 import './ComponentReadiness.css'
-import { CompReadyVarsContext } from './CompReadyVars'
+import {
+  CompReadyVarsContext,
+  confidenceParamDefault,
+  excludeCloudsCheckedItemsDefault,
+  excludeNetworksCheckedItems,
+  groupByCheckedItemsDefault,
+  ignoreMissingParamDefault,
+  ignoreDisruptionParamDefault,
+  minFailParamDefault,
+  pittyParamDefault,
+  setExcludeUpgradesCheckedItemsDefault,
+  setExcludeVariantsCheckedItemsDefault,
+} from './CompReadyVars'
 import {
   dateFormat,
   formatLongDate,
@@ -42,7 +54,17 @@ export default function CompReadyMainInputs(props) {
       id: 'Default',
       name: 'Default',
       config: {
-        /* ...Default config */
+        'Group By': groupByCheckedItemsDefault,
+        'Exclude Arches': excludeCloudsCheckedItemsDefault,
+        'Exclude Networks': excludeNetworksCheckedItems,
+        'Exclude Clouds': excludeNetworksCheckedItems,
+        'Exclude Upgrades': setExcludeUpgradesCheckedItemsDefault,
+        'Exclude Variants': setExcludeVariantsCheckedItemsDefault,
+        'Confidence': confidenceParamDefault,
+        'Pity': pittyParamDefault,
+        'Min Fail': minFailParamDefault,
+        'Ignore Missing': ignoreMissingParamDefault,
+        'Ignore Disruption': ignoreDisruptionParamDefault,
       },
     },
     {
