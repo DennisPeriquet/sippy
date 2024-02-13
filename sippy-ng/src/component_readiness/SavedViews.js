@@ -1,51 +1,60 @@
-import './SavedViews.css'
-import {
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Typography,
-} from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { Button, Menu, MenuItem, Tooltip } from '@mui/material'
+import { ViewCarousel } from '@mui/icons-material'
 import PropTypes from 'prop-types'
-import React, { useState } from 'react'
+import React, { Fragment } from 'react'
 
 export default function SavedViews(props) {
-  const { views, onSelectView, onDeleteView } = props
+  const [anchor, setAnchor] = React.useState('')
+  const [buttonName, setButtonName] = React.useState(props.view)
 
-  const [selectedView, setSelectedView] = useState('Default')
+  const handleClick = (event) => {
+    setAnchor(event.currentTarget)
+  }
 
-  const handleChange = (event) => {
-    const viewName = event.target.value
-    setSelectedView(viewName)
-    const view = views.find((v) => v.name === viewName)
-    onSelectView(view)
+  const handleClose = () => {
+    setAnchor(null)
   }
 
   return (
-    <FormControl variant="outlined" fullWidth>
-      <InputLabel id="saved-views-label">
-        <Typography className="savedviews-label">Selected View</Typography>
-      </InputLabel>
-      <Select
-        labelId="saved-views-label"
-        id="saved-views-select"
-        value={selectedView}
-        label="Selected View"
-        onChange={handleChange}
+    <Fragment>
+      <Button
+        aria-controls="view-menu"
+        aria-haspopup="true"
+        startIcon={<ViewCarousel />}
+        color="primary"
+        onClick={handleClick}
       >
-        {views.map((view) => (
-          <MenuItem key={view.id} value={view.name}>
-            {view.name}
+        {buttonName} View
+      </Button>
+      <Menu
+        id="view-menu"
+        anchorEl={anchor}
+        keepMounted
+        open={Boolean(anchor)}
+        onClose={handleClose}
+      >
+        {Object.entries(props.views).map(([e, v]) => (
+          <MenuItem
+            key={e}
+            style={{
+              fontWeight: props.view === e ? 'bold' : 'normal',
+            }}
+            onClick={() => {
+              props.setView(e)
+              setButtonName(e)
+              handleClose()
+            }}
+          >
+            {e}
           </MenuItem>
         ))}
-      </Select>
-    </FormControl>
+      </Menu>
+    </Fragment>
   )
 }
 
 SavedViews.propTypes = {
-  views: PropTypes.array.isRequired,
-  onSelectView: PropTypes.func.isRequired,
-  onDeleteView: PropTypes.func.isRequired,
+  view: PropTypes.string,
+  views: PropTypes.object,
+  setView: PropTypes.func.isRequired,
 }

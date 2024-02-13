@@ -37,10 +37,8 @@ export default function CompReadyMainInputs(props) {
 
   const varsContext = useContext(CompReadyVarsContext)
 
-  const [views, setViews] = useState([
-    {
-      id: 'Default',
-      name: 'Default',
+  const [views, setViews] = useState({
+    Default: {
       config: {
         'Group By': varsContext.defaultGroupByCheckedItems,
         'Exclude Arches': varsContext.defaultExcludeArchesCheckedItems,
@@ -55,40 +53,55 @@ export default function CompReadyMainInputs(props) {
         'Ignore Disruption': varsContext.defaultIgnoreDisruptionParam,
       },
     },
-    {
-      id: 'View1',
-      name: 'View1',
+    'Upgrade Variants': {
       config: {
-        /* ...View1 config */
+        'Group By': ['upgrade', 'variants'],
+        'Exclude Arches': varsContext.defaultExcludeArchesCheckedItems,
+        'Exclude Networks': varsContext.defaultExcludeNetworksCheckedItems,
+        'Exclude Clouds': varsContext.defaultExcludeCloudsCheckedItems,
+        'Exclude Upgrades': varsContext.defaultExcludeUpgradesCheckedItems,
+        'Exclude Variants': varsContext.defaultExcludeVariantsCheckedItems,
+        Confidence: varsContext.defaultConfidenceParam,
+        Pity: varsContext.defaultPityParam,
+        'Min Fail': varsContext.defaultMinFailParam,
+        'Ignore Missing': varsContext.defaultIgnoreMissingParam,
+        'Ignore Disruption': varsContext.defaultIgnoreDisruptionParam,
       },
     },
-    {
-      id: 'View2',
-      name: 'View2',
+    ARM: {
       config: {
-        /* ...View2 config */
+        'Group By': varsContext.defaultGroupByCheckedItems,
+        'Exclude Arches': ['amd64', 'ppc64le', 's390x', 'heterogeneous'],
+        'Exclude Networks': varsContext.defaultExcludeNetworksCheckedItems,
+        'Exclude Clouds': varsContext.defaultExcludeCloudsCheckedItems,
+        'Exclude Upgrades': varsContext.defaultExcludeUpgradesCheckedItems,
+        'Exclude Variants': varsContext.defaultExcludeVariantsCheckedItems,
+        Confidence: varsContext.defaultConfidenceParam,
+        Pity: varsContext.defaultPityParam,
+        'Min Fail': varsContext.defaultMinFailParam,
+        'Ignore Missing': varsContext.defaultIgnoreMissingParam,
+        'Ignore Disruption': varsContext.defaultIgnoreDisruptionParam,
       },
     },
-  ])
+    heterogeneous: {
+      config: {
+        'Group By': varsContext.defaultGroupByCheckedItems,
+        'Exclude Arches': ['amd64', 'arm64', 'ppc64le', 's390x'],
+        'Exclude Networks': varsContext.defaultExcludeNetworksCheckedItems,
+        'Exclude Clouds': varsContext.defaultExcludeCloudsCheckedItems,
+        'Exclude Upgrades': varsContext.defaultExcludeUpgradesCheckedItems,
+        'Exclude Variants': varsContext.defaultExcludeVariantsCheckedItems,
+        Confidence: varsContext.defaultConfidenceParam,
+        Pity: varsContext.defaultPityParam,
+        'Min Fail': varsContext.defaultMinFailParam,
+        'Ignore Missing': varsContext.defaultIgnoreMissingParam,
+        'Ignore Disruption': varsContext.defaultIgnoreDisruptionParam,
+      },
+    },
+  })
 
-  const handleSelectView = (view) => {
-    // Update UI and regenerate report based on the selected view
-  }
-
-  const handleDeleteView = (viewId) => {
-    // Delete view from the state and possibly from local storage/backend
-    setViews(views.filter((view) => view.id !== viewId))
-  }
-
-  const handleSaveView = (viewConfig) => {
-    // Serialize and save the view configuration
-    const newView = {
-      id: Date.now(), // or another unique identifier
-      name: `View ${views.length + 1}`,
-      config: viewConfig,
-    }
-    setViews([...views, newView])
-    // Also save to local storage/backend here
+  const setView = (view) => {
+    console.log('Setting view to', view)
   }
 
   return (
@@ -156,11 +169,7 @@ export default function CompReadyMainInputs(props) {
         ></ReleaseSelector>
       </div>
       <div>
-        <SavedViews
-          views={views}
-          onSelectView={handleSelectView}
-          onDeleteView={handleDeleteView}
-        />
+        <SavedViews view={'Default'} views={views} setView={setView} />
         <CheckBoxList
           headerName="Group By"
           displayList={groupByList}
