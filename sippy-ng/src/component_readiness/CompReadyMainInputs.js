@@ -102,6 +102,18 @@ export default function CompReadyMainInputs(props) {
 
   const setView = (view) => {
     console.log('Setting view to', view)
+    const config = views[view].config
+    varsContext.setGroupByCheckedItems(config['Group By'])
+    varsContext.setExcludeArchesCheckedItems(config['Exclude Arches'])
+    varsContext.setExcludeNetworksCheckedItems(config['Exclude Networks'])
+    varsContext.setExcludeCloudsCheckedItems(config['Exclude Clouds'])
+    varsContext.setExcludeUpgradesCheckedItems(config['Exclude Upgrades'])
+    varsContext.setExcludeVariantsCheckedItems(config['Exclude Variants'])
+    varsContext.setConfidence(config['Confidence'])
+    varsContext.setPity(config['Pity'])
+    varsContext.setMinFail(config['Min Fail'])
+    varsContext.setIgnoreMissing(config['Ignore Missing'])
+    varsContext.setIgnoreDisruption(config['Ignore Disruption'])
   }
 
   return (
