@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 #
-# This script can be used to generate JSON output or DB records for component readiness resolved incidents. 
+# This script can be used to generate JSON output or DB records for component readiness resolved incidents.
 # By default it will output JSON to stdout.  The output can be reviewed and after verification specify --output-type=DB
 # to persist the record(s).  Prior to persisting the DB record you can write the JSON to a file by specifying --output-file
 # review and modify the JSON to remove any extraneous job runs, etc and then specify the file using --input-file to control
 # the records created.  Additionally an input file can be hand crafted specifying multiple TestId records as well as Variant
-# data and / or JobRun StartTime filtering.  See test_matches and job_matches for more details. 
+# data and / or JobRun StartTime filtering.  See test_matches and job_matches for more details.
 #
 # Specify the test-report-url by navigating through component readiness to get to the most focused view of the test(s) in question
 # and copying the URL from the developer tools network view.  That URL will form the base query for looking up failed tests based
 # on the test-id parameter, which can be copied from the test details report, or list of TestId records in the input-file.
-# Specify the test-release, issue-type and issue-url related to the incident if applicable. 
+# Specify the test-release, issue-type and issue-url related to the incident if applicable.
 
 
 import argparse
@@ -48,7 +48,7 @@ def hack_for_rfc_3339(inputTime):
     # nasty hack since python doesn't support RFC-3339
     if inputTime.endswith('Z'):
         inputTime = inputTime[:-1] + '+00:00'
-    
+
     return inputTime
 
 def ensure_resolved_incidents_table_exists():
@@ -87,7 +87,7 @@ def ensure_resolved_incidents_table_exists():
         bigquery.SchemaField("id", "STRING", mode="REQUIRED"),
         bigquery.SchemaField("update_time", "TIMESTAMP", mode="REQUIRED")])
 
-    
+
     ]
 
     table = bigquery.Table(TABLE_KEY, schema=schema)
@@ -101,12 +101,12 @@ def ensure_resolved_incidents_table_exists():
 # or there is at least 1 job run in common. If so we will return the record so it
 # can be updated with any new job runs instead of creating a new incident
 def match_existing_incident(variants, issue_type, issue_url, existing_results, new_job_runs):
-    
+
     complete_jobs = []
-    
+
     for job in new_job_runs:
         complete_jobs.append({"url": job["URL"], "start_time": hack_for_rfc_3339(job["StartTime"])})
-    
+
 
     vKey = key_from_variants(variants)
     updateIncidentID = ""
@@ -119,7 +119,7 @@ def match_existing_incident(variants, issue_type, issue_url, existing_results, n
 
             if rowKey != vKey:
                 continue
-            
+
 
             existing_issue = row["issue"]
             # issue type is required but we have to check to see if the existing issue has a url or not
@@ -141,10 +141,10 @@ def match_existing_incident(variants, issue_type, issue_url, existing_results, n
                                 updateIncidentID = row["incident_id"]
                                 matchedRow = row
                                 print("Matched IncidentID: " + updateIncidentID)
-                       
+
 
         if len(updateIncidentID) > 0 and matchedRow != None:
-            # get the jobs we don't already have in our list            
+            # get the jobs we don't already have in our list
             for jobRun in matchedRow["job_runs"]:
                     found = False
                     for existingRun in complete_jobs:
@@ -152,14 +152,14 @@ def match_existing_incident(variants, issue_type, issue_url, existing_results, n
                             found = True
                             break
 
-                    if not found :        
+                    if not found :
                         complete_jobs.append({"url": jobRun["URL"], "start_time": hack_for_rfc_3339(jobRun["StartTime"])})
 
             return updateIncidentID, complete_jobs, matchedRow["attributions"], matchedRow["modified_time"]
 
-    return None,None,None,None                    
-                            
-                   
+    return None,None,None,None
+
+
 
 def write_incident_record (triaged_incident, modified_time, target_modified_time):
 
@@ -183,7 +183,7 @@ def write_incident_record (triaged_incident, modified_time, target_modified_time
         issue_url   = triaged_incident["Issue"]["URL"]
     if "Description" in triaged_incident["Issue"]:
         issue_description   = triaged_incident["Issue"]["Description"]
-    
+
     # build a query to check for exising incidents
     query_job = client.query(f"SELECT * FROM `{TABLE_KEY}` WHERE release='{release}' AND test_id='{test_id}' \
                             AND modified_time > TIMESTAMP_ADD(TIMESTAMP('{target_modified_time}'), INTERVAL -14 DAY) AND modified_time < TIMESTAMP('{target_modified_time}')" )
@@ -204,17 +204,17 @@ def write_incident_record (triaged_incident, modified_time, target_modified_time
     if updateIncidentID != None and complete_jobs == None:
         print("Invalid incident id match, skipping")
         return
-    
+
     # if we have a valid updateIncidentID we will attempt to update the existing record
     if updateIncidentID != None and len(updateIncidentID) > 0:
         if len(complete_jobs) == 0:
             print(f"Matching IncidentID {updateIncidentID} is missing jobs")
             return
-        
-        #generate common where clause that includes modifiedTime
-        where = f" WHERE incident_id='{updateIncidentID}' AND modified_time=TIMESTAMP('{lastModification}')"   
 
-        
+        #generate common where clause that includes modifiedTime
+        where = f" WHERE incident_id='{updateIncidentID}' AND modified_time=TIMESTAMP('{lastModification}')"
+
+
         earliestAttribution = None
         updateAttributions = f"SELECT '{client._credentials.service_account_email}' AS id, TIMESTAMP('{modified_time}') AS update_time"
         # might use a select statement from the table instead of the static list of existing attributions, if I can make it work...
@@ -223,10 +223,10 @@ def write_incident_record (triaged_incident, modified_time, target_modified_time
             attributionID = attribution["id"]
             attributionUpdateTime = attribution["update_time"]
             updateAttributions += f" UNION ALL SELECT '{attributionID}' AS id, TIMESTAMP('{attributionUpdateTime}') AS update_time"
-            
+
             if earliestAttribution == None or attributionUpdateTime < earliestAttribution:
                 earliestAttribution = attributionUpdateTime
-            
+
 
         # once the record is persisted we can update multiple times
         # but when originally written it is not available for modification right away
@@ -241,7 +241,7 @@ def write_incident_record (triaged_incident, modified_time, target_modified_time
                 print(f"Found existing incident {updateIncidentID} with a pending modification {lastModification}.  Please try the update again later")
                 return
 
-      
+
         earliestStartTime = None
         latestStartTime = None
         updateJobRuns = ""
@@ -256,18 +256,18 @@ def write_incident_record (triaged_incident, modified_time, target_modified_time
             except ValueError:
                 print("Error parsing start time: " + jr["start_time"])
 
-            
+
             if len(updateJobRuns) > 0 :
                 updateJobRuns += " UNION ALL  "
-            
-            jobURL = jr["url"] 
+
+            jobURL = jr["url"]
             jobStartTime = jr["start_time"]
             updateJobRuns += f"SELECT '{jobURL}' AS url, TIMESTAMP('{jobStartTime}') AS start_time"
 
 
         q = f"UPDATE `{TABLE_KEY}` SET job_runs=ARRAY(SELECT AS STRUCT * FROM ({updateJobRuns})), attributions=ARRAY(SELECT AS STRUCT * FROM({updateAttributions})), modified_time='{modified_time}'"
         #q = "UPDATE `" + TABLE_KEY +"` SET JobRuns=ARRAY(SELECT AS STRUCT * FROM (" +  updateJobRuns  +")), attributions=ARRAY(SELECT AS STRUCT * FROM("+ updateAttributions + ")), modified_time='" + modified_time + "'"
-        
+
         q += f", issue.start_date=TIMESTAMP('{earliestStartTime}'), issue.resolution_date=TIMESTAMP('{latestStartTime}')"
 
         if len(issue_description) > 0 :
@@ -277,15 +277,15 @@ def write_incident_record (triaged_incident, modified_time, target_modified_time
             q += f", issue.type='{issue_type}'"
 
         if len(issue_url) > 0:
-            q += f", issue.url='{issue_url}'"    
-        
+            q += f", issue.url='{issue_url}'"
+
         q += where
-    
+
 
         query_job = client.query(q)
         results = query_job.result()
         print(results.num_dml_affected_rows)
-    
+
     # we didn't match an existing record so create a new one
     else:
 
@@ -297,17 +297,17 @@ def write_incident_record (triaged_incident, modified_time, target_modified_time
 
         incidentID =  str(uuid.uuid4())
         save_jobs = []
-                
+
         earliestStartTime = None
         latestStartTime = None
         for jr in job_runs:
             startTime = datetime.fromisoformat(hack_for_rfc_3339(jr["StartTime"]))
             save_jobs.append({"url": jr["URL"], "start_time": startTime})
-            
+
             if earliestStartTime == None or startTime < earliestStartTime:
                 earliestStartTime = startTime
             if latestStartTime == None or latestStartTime < startTime:
-                latestStartTime = startTime    
+                latestStartTime = startTime
 
 
         if earliestStartTime == None:
@@ -318,18 +318,18 @@ def write_incident_record (triaged_incident, modified_time, target_modified_time
             issue["description"] = issue_description
 
         row = {"release": release, "test_id": test_id, "test_name": test_name, "incident_id": incidentID, "modified_time": modified_time,
-                "variants": variants, 
+                "variants": variants,
                 "job_runs": save_jobs,
                 "issue": issue,
                 "attributions": [{"id": client._credentials.service_account_email, "update_time": modified_time}]
                 }
 
 
-        rows = [row]            
+        rows = [row]
         table_ref = client.dataset(DATASET_ID).table(TABLE_ID)
         table = client.get_table(table_ref)
-        errors = client.insert_rows(table, rows) 
-        
+        errors = client.insert_rows(table, rows)
+
         if len(errors) > 0:
             print(f"Errors creating the incident: {errors}")
         else :
@@ -355,7 +355,7 @@ def validate_parameters(triage_data, issue_type, test_id):
     # currently we require a TestId for each record
     # if we are missing an IssueType then we require
     # an issue_type to have been provided via arguments and passed in
-    
+
     valid_inputs = True
     validated_record_counts = {}
     validated_record_counts["TotalRecords"] = 0
@@ -364,7 +364,7 @@ def validate_parameters(triage_data, issue_type, test_id):
     if triage_data:
         for record in triage_data:
             validated_record_counts["TotalRecords"] += 1
-                
+
             if  "Issue" in record:
                 if "Type" in record["Issue"] and len(record["Issue"]["Type"]) > 0:
                      if record["Issue"]["Type"] == "Product" or record["Issue"]["Type"] == "Infrastructure":
@@ -372,18 +372,18 @@ def validate_parameters(triage_data, issue_type, test_id):
             if "TestId" in record and len(record["TestId"]) > 0:
                 validated_record_counts["TestId"] += 1
 
-  
+
     # we have to have values for issue_type and test_id
     if len(issue_type) == 0:
-       if validated_record_counts["TotalRecords"] == 0 or validated_record_counts["TotalRecords"] >  validated_record_counts["IssueType"]:   
+       if validated_record_counts["TotalRecords"] == 0 or validated_record_counts["TotalRecords"] >  validated_record_counts["IssueType"]:
             print("Missing input parameter for Issue Type")
             valid_inputs = False
-    
+
     # at a minimum we have to have a TestId for each record in triage_data
     if (validated_record_counts["TotalRecords"] == 0 and len(test_id) == 0) or (validated_record_counts["TotalRecords"] > 0 and validated_record_counts["TotalRecords"] >  validated_record_counts["TestId"]):
         print("Missing input parameter for Test Id")
         valid_inputs = False
-    
+
     if not valid_inputs:
         exit()
 
@@ -397,7 +397,7 @@ def key_from_variants(variants):
         if len(key) > 0:
             key += "_"
         key += v["key"] + "_" + v["value"]
-    
+
     return key
 
 def match_variant(variants, key, value):
@@ -410,11 +410,11 @@ def match_variant(variants, key, value):
 # The JSON file allows for more test_ids to be targeted along with more refined matching
 # via variants and in job matches job start_time and URL
 def test_matches(triage_data, target_test_id, test_id, variants):
-    
+
     # if we have a target via argument and it matches then we always match
     if target_test_id and target_test_id == test_id:
         return True, None
-    
+
     # otherwise do we have an entry for this test id in triage_data
     # do we need to support multiples?  Currently first match wins
     if triage_data:
@@ -433,7 +433,7 @@ def test_matches(triage_data, target_test_id, test_id, variants):
                     return True, record
 
     return False, None
-    
+
 def compare_time_is_greater(base, check):
     # check if either is a string
     # if so get time object
@@ -450,10 +450,10 @@ def compare_time_is_greater(base, check):
     else:
         check_time = check
 
-    return check > base  
+    return check > base
 
 def job_matches(record, prow_url, start_time):
-    if record:        
+    if record:
         if "StartTimeMax" in record:
             mx = record["StartTimeMax"]
             if compare_time_is_greater(mx, start_time):
@@ -478,7 +478,7 @@ def issue_details(record, issue_type, issue_description, issue_url):
             if "Type" in record["Issue"]:
                 if len(record["Issue"]["Type"]) > 0:
                     if record["Issue"]["Type"] == "Product" or record["Issue"]["Type"] == "Infrastructure":
-                        issue_type = record["Issue"]["Type"] 
+                        issue_type = record["Issue"]["Type"]
             if "Description" in record["Issue"]:
                     if len(record["Issue"]["Description"]) > 0:
                         issue_description = record["Issue"]["Description"]
@@ -486,8 +486,8 @@ def issue_details(record, issue_type, issue_description, issue_url):
                     if len(record["Issue"]["URL"]) > 0:
                         issue_url = record["Issue"]["URL"]
 
-    return issue_type, issue_description, issue_url 
-                    
+    return issue_type, issue_description, issue_url
+
 
 if __name__ == '__main__':
 
@@ -502,12 +502,12 @@ if __name__ == '__main__':
     parser.add_argument("--output-file", help="Write JSON output to the specified file instead of DB.")
     parser.add_argument("--input-file", help="JSON input file containing test criteria for creating incidents.")
     parser.add_argument("--output-type", choices=['JSON', 'DB'], help="Write the incident record(s) as JSON or as DB record", default='JSON')
-    
+
     args = parser.parse_args()
 
     if args.test_id:
         print("\n\nTestID: " + args.test_id)
-    
+
     if args.issue_type:
         print("\nIssue Type: " + args.issue_type)
 
@@ -527,7 +527,7 @@ if __name__ == '__main__':
             exit()
 
     validate_parameters(triage_data, args.issue_type, args.test_id)
-    
+
     if args.output_type == "DB":
         if None == os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'):
             print("Missing 'GOOGLE_APPLICATION_CREDENTIALS' env variable for DB output")
@@ -535,7 +535,7 @@ if __name__ == '__main__':
 
     output_file = ""
     if args.output_file:
-        output_file = args.output_file.strip("'")    
+        output_file = args.output_file.strip("'")
 
     issue_url = ""
     if args.issue_url:
@@ -546,23 +546,23 @@ if __name__ == '__main__':
         description = args.issue_description
 
     modified_time = datetime.now(tz=timezone.utc)
-    
+
     target_modified_time = f"{modified_time}"
     if args.target_modified_time:
         try:
-            targetModifiedTime = datetime.fromisoformat(hack_for_rfc_3339(args.target_modified_time))   
+            targetModifiedTime = datetime.fromisoformat(hack_for_rfc_3339(args.target_modified_time))
         except ValueError:
             print("Invalid target modified Date: " + args.target_modified_time)
             exit()
 
-        # keep the string format for now...     
+        # keep the string format for now...
         target_modified_time = args.target_modified_time
 
     print(f"\nIssue URL: {issue_url}")
     print(f"\nIssue Description: {description}")
     print(f"\nModified Time: {modified_time}")
     print(f"\nTargetModifiedTime: {target_modified_time}")
-    
+
 
     # Fetch the top level regressed component + tests report:
     top_lvl_report = fetch_json_data(args.test_report_url)
@@ -598,7 +598,7 @@ if __name__ == '__main__':
                 # then check to see if we have specified jobruns
                 # or if we specified JobRunStartRangeBegin / JobRunStartRangeEnd
                 matches, record = test_matches(triage_data, args.test_id, test_id, variants)
-                
+
 
                 if not matches:
                     continue
@@ -613,7 +613,7 @@ if __name__ == '__main__':
                 component = rt['component']
                 capability = rt['capability']
                 test_name = rt['test_name']
-                
+
 
 # TODO: These are the url params we need to add onto those in the TEST_REPORT URL when we go to get the test details (job run data):
 # &component=Monitoring&capability=Other&testId=openshift-tests-upgrade:c1f54790201ec8f4241eca902f854b79&environment=ovn%20upgrade-minor%20amd64%20metal-ipi%20standard&network=ovn&upgrade=upgrade-minor&arch=amd64&platform=metal-ipi&variant=standard
@@ -629,7 +629,7 @@ if __name__ == '__main__':
 
                 if json_data is None:
                     print("Error: no json data returned from %s" % test_details_url)
-                
+
                 triaged_incident = {}
                 # test_release can't change since we only input one test_report_url
                 # currently require it as part of input args, though it could also be pulled out of json if provided
@@ -671,7 +671,7 @@ if __name__ == '__main__':
                         if job_matches(record, prow_url, start_time):
                             triaged_incident["JobRuns"].append({"URL": prow_url, "StartTime": start_time})
 
-                
+
                 if args.output_type == 'JSON':
                     triaged_incidents.append(triaged_incident)
                     # add that to a list of incidents that we write in the end
@@ -680,7 +680,7 @@ if __name__ == '__main__':
                     write_incident_record(triaged_incident, modified_time, target_modified_time)
 
     if args.output_type == 'JSON':
-        if len(output_file) > 0:      
+        if len(output_file) > 0:
             with open(output_file, 'w') as incident_file:
                 json.dump(triaged_incidents, incident_file)
                 print(f"output data to {output_file}")
