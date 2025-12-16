@@ -420,6 +420,13 @@ def main():
             time_diff = previous_time - current_time  # Previous is newer, so previous - current gives positive
             hours_diff = time_diff.total_seconds() / 3600
 
+        # Extract day of week from release tag timestamp
+        try:
+            release_time = datetime.fromisoformat(item["release_time"].replace("Z", "+00:00"))
+            day_abbrev = release_time.strftime("%a")[:2].upper()  # First 2 letters, uppercase
+        except (ValueError, KeyError):
+            day_abbrev = "??"
+
         # Create visual representation with equals signs (1 hour = 1 =, every 5th = is a ., every 10th = is a |)
         total_chars = int(hours_diff)
         visual_chars = ""
@@ -433,7 +440,7 @@ def main():
 
         hours_text = f"{hours_diff:.1f}h"
 
-        print(f"{colored_tag} {hours_text:>8} {visual_chars}")
+        print(f"{colored_tag} {day_abbrev} {hours_text:>8} {visual_chars}")
 
 
 if __name__ == "__main__":
