@@ -88,6 +88,9 @@ def get_release_tags_from_sippy(
             end_time = datetime.now(timezone.utc) - timedelta(days=offset_days)
             start_time = end_time - timedelta(days=days_back - 1)
 
+            # Set to start of day for start_time to include all builds from that day
+            start_time = start_time.replace(hour=0, minute=0, second=0, microsecond=0)
+
             filtered_data = []
             for item in data:
                 release_time = datetime.fromisoformat(item["release_time"].replace("Z", "+00:00"))
@@ -180,6 +183,9 @@ def get_release_tags_from_rc(
             end_time = datetime.now(timezone.utc) - timedelta(days=offset_days)
             start_time = end_time - timedelta(days=days_back - 1)
 
+            # Set to start of day for start_time to include all builds from that day
+            start_time = start_time.replace(hour=0, minute=0, second=0, microsecond=0)
+
             filtered_data = []
             for item in converted_data:
                 try:
@@ -261,6 +267,11 @@ def generate_summary_report(
     now = datetime.now(timezone.utc)
 
     for release in release_versions:
+        # Skip 4.22 for sippy source since it's not implemented yet
+        if source == "sippy" and release == "4.22":
+            print(f"{release:<8} {'Skip':<8} {'Not implemented in sippy':<35} {'-':<10} {'-':>8}")
+            continue
+
         try:
             if source == "rc":
                 release_data = get_release_tags_from_rc(release, stream, arch, days_back, offset_days)
@@ -271,6 +282,15 @@ def generate_summary_report(
             if count > 0:
                 latest = release_data[0]["release_tag"]
                 phase = release_data[0].get("phase", "Unknown")
+
+                # Color code the phase
+                if phase == "Accepted":
+                    colored_phase = f"{Colors.GREEN}{phase}{Colors.RESET}"
+                elif phase == "Rejected":
+                    colored_phase = f"{Colors.RED}{phase}{Colors.RESET}"
+                else:
+                    colored_phase = phase
+
                 # Calculate age of latest release
                 try:
                     release_time = datetime.fromisoformat(release_data[0]["release_time"].replace("Z", "+00:00"))
@@ -281,12 +301,12 @@ def generate_summary_report(
                     age = "Unknown"
             else:
                 latest = "No releases"
-                phase = "-"
+                colored_phase = "-"
                 age = "-"
 
             total_releases += count
 
-            print(f"{release:<8} {count:<8} {latest:<35} {phase:<10} {age:>8}")
+            print(f"{release:<8} {count:<8} {latest:<35} {colored_phase:<10} {age:>8}")
 
         except Exception as e:
             print(f"{release:<8} {'Error':<8} {str(e)[:30]:<35} {'Error':<10} {'Error':>8}")
@@ -374,7 +394,7 @@ def main():
         )
 
     # Print header with release count and date range
-    print(f"Found {len(release_data)} releases:")
+    print(f"Found {len(release_data)} builds:")
 
     # Display date range if filtering is applied
     if args.days:
@@ -423,9 +443,9 @@ def main():
         # Extract day of week from release tag timestamp
         try:
             release_time = datetime.fromisoformat(item["release_time"].replace("Z", "+00:00"))
-            day_abbrev = release_time.strftime("%a")[:2].upper()  # First 2 letters, uppercase
+            day_abbrev = release_time.strftime("%a")  # 3 letters: Sun, Mon, Tue, etc.
         except (ValueError, KeyError):
-            day_abbrev = "??"
+            day_abbrev = "???"
 
         # Create visual representation with equals signs (1 hour = 1 =, every 5th = is a ., every 10th = is a |)
         total_chars = int(hours_diff)
