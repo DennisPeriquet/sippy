@@ -12,6 +12,8 @@ Here are some examples of how to run it:
     ./get_release_tags.py 4.21 --days 14
     ./get_release_tags.py 4.21 --source rc
     ./get_release_tags.py 4.21 --source sippy
+    ./get_release_tags.py all --days 7
+    ./get_release_tags.py all --source rc
 """
 
 import argparse
@@ -36,6 +38,7 @@ def get_release_tags_from_sippy(
     stream: str = "nightly",
     arch: str = "amd64",
     days_back: Optional[int] = None,
+    offset_days: int = 0,
     base_url: str = "https://sippy.dptools.openshift.org"
 ) -> List[dict]:
     """
@@ -46,6 +49,7 @@ def get_release_tags_from_sippy(
         stream (str): The stream name (default: "nightly").
         arch (str): The architecture (default: "amd64").
         days_back (Optional[int]): Number of days back from today to filter (default: None, which means all).
+        offset_days (int): Number of days to offset backwards from today before applying days_back filter (default: 0).
         base_url (str): The base URL for the Sippy API.
 
     Return Value(s):
@@ -73,22 +77,29 @@ def get_release_tags_from_sippy(
     url = f"{base_url}/api/releases/tags?release={release}&filter={filter_param}&sortField=release_time&sort=desc"
 
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)  # 10 second timeout
         response.raise_for_status()
         data = response.json()
 
         # Filter by date client-side if days_back is specified
         if days_back is not None:
-            cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_back)
+            # Calculate the time window: offset_days back from now, then days_back from there
+            # days_back includes today, so subtract (days_back - 1) to get proper start time
+            end_time = datetime.now(timezone.utc) - timedelta(days=offset_days)
+            start_time = end_time - timedelta(days=days_back - 1)
+
             filtered_data = []
             for item in data:
                 release_time = datetime.fromisoformat(item["release_time"].replace("Z", "+00:00"))
-                if release_time >= cutoff_date:
+                if start_time <= release_time <= end_time:
                     filtered_data.append(item)
             data = filtered_data
 
         return data
 
+    except requests.exceptions.Timeout:
+        print(f"Timeout fetching data from Sippy (10s timeout exceeded)", file=sys.stderr)
+        sys.exit(1)
     except requests.exceptions.RequestException as e:
         print(f"Error fetching data from Sippy: {e}", file=sys.stderr)
         sys.exit(1)
@@ -101,7 +112,8 @@ def get_release_tags_from_rc(
     release: str,
     stream: str = "nightly",
     arch: str = "amd64",
-    days_back: Optional[int] = None
+    days_back: Optional[int] = None,
+    offset_days: int = 0
 ) -> List[dict]:
     """
     Fetches release tags from release-controller API for the specified release, stream, and architecture.
@@ -111,6 +123,7 @@ def get_release_tags_from_rc(
         stream (str): The stream name (default: "nightly").
         arch (str): The architecture (default: "amd64").
         days_back (Optional[int]): Number of days back from today to filter (default: None, which means all).
+        offset_days (int): Number of days to offset backwards from today before applying days_back filter (default: 0).
 
     Return Value(s):
         List[dict]: List of release tag data.
@@ -119,7 +132,7 @@ def get_release_tags_from_rc(
     url = f"https://{arch}.ocp.releases.ci.openshift.org/api/v1/releasestream/{release}.0-0.{stream}/tags"
 
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)  # 10 second timeout
         response.raise_for_status()
         data = response.json()
 
@@ -162,12 +175,16 @@ def get_release_tags_from_rc(
 
         # Filter by date if days_back is specified
         if days_back is not None:
-            cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_back)
+            # Calculate the time window: offset_days back from now, then days_back from there
+            # days_back includes today, so subtract (days_back - 1) to get proper start time
+            end_time = datetime.now(timezone.utc) - timedelta(days=offset_days)
+            start_time = end_time - timedelta(days=days_back - 1)
+
             filtered_data = []
             for item in converted_data:
                 try:
                     release_time = datetime.fromisoformat(item["release_time"].replace("Z", "+00:00"))
-                    if release_time >= cutoff_date:
+                    if start_time <= release_time <= end_time:
                         filtered_data.append(item)
                 except ValueError:
                     # Keep items with unparseable dates
@@ -179,12 +196,104 @@ def get_release_tags_from_rc(
 
         return converted_data
 
+    except requests.exceptions.Timeout:
+        print(f"Timeout fetching data from release-controller (10s timeout exceeded)", file=sys.stderr)
+        sys.exit(1)
     except requests.exceptions.RequestException as e:
         print(f"Error fetching data from release-controller: {e}", file=sys.stderr)
         sys.exit(1)
     except (KeyError, json.JSONDecodeError) as e:
         print(f"Error parsing response: {e}", file=sys.stderr)
         sys.exit(1)
+
+
+def generate_summary_report(
+    stream: str = "nightly",
+    arch: str = "amd64",
+    days_back: Optional[int] = None,
+    offset_days: int = 0,
+    source: str = "sippy",
+    base_url: str = "https://sippy.dptools.openshift.org"
+) -> None:
+    """
+    Generates a summary report for releases 4.12 through 4.22.
+
+    Arg(s):
+        stream (str): The stream name (default: "nightly").
+        arch (str): The architecture (default: "amd64").
+        days_back (Optional[int]): Number of days back from today to filter (default: None, which means all).
+        offset_days (int): Number of days to offset backwards from today before applying days_back filter (default: 0).
+        source (str): Data source - "sippy" or "rc".
+        base_url (str): The base URL for the Sippy API.
+    """
+    print("Release Summary Report")
+    print("=" * 50)
+    print(f"Stream: {stream}, Architecture: {arch}")
+
+    # Calculate and display date range
+    if days_back:
+        end_time = datetime.now(timezone.utc) - timedelta(days=offset_days)
+        start_time = end_time - timedelta(days=days_back - 1)  # Include today as day 1
+
+        end_str = end_time.strftime("%Y-%m-%d (%A)")
+        start_str = start_time.strftime("%Y-%m-%d (%A)")
+
+        print(f"Time range: {start_str} to {end_str}")
+        if offset_days > 0:
+            print(f"Offset: {offset_days} days back from today")
+    else:
+        print("Time range: All available data")
+
+    print(f"Data source: {source}")
+    print()
+
+    total_releases = 0
+    release_versions = []
+
+    # Generate list of releases from 4.22 down to 4.12
+    for major in [4]:
+        for minor in range(22, 11, -1):  # 22 down to 12
+            release_versions.append(f"{major}.{minor}")
+
+    print(f"{'Version':<8} {'Count':<8} {'Latest Release':<35} {'Phase':<10} {'Age':>8}")
+    print("-" * 85)
+
+    now = datetime.now(timezone.utc)
+
+    for release in release_versions:
+        try:
+            if source == "rc":
+                release_data = get_release_tags_from_rc(release, stream, arch, days_back, offset_days)
+            else:
+                release_data = get_release_tags_from_sippy(release, stream, arch, days_back, offset_days, base_url)
+
+            count = len(release_data)
+            if count > 0:
+                latest = release_data[0]["release_tag"]
+                phase = release_data[0].get("phase", "Unknown")
+                # Calculate age of latest release
+                try:
+                    release_time = datetime.fromisoformat(release_data[0]["release_time"].replace("Z", "+00:00"))
+                    time_diff = now - release_time
+                    hours_ago = time_diff.total_seconds() / 3600
+                    age = f"{hours_ago:.1f}h"
+                except (ValueError, KeyError):
+                    age = "Unknown"
+            else:
+                latest = "No releases"
+                phase = "-"
+                age = "-"
+
+            total_releases += count
+
+            print(f"{release:<8} {count:<8} {latest:<35} {phase:<10} {age:>8}")
+
+        except Exception as e:
+            print(f"{release:<8} {'Error':<8} {str(e)[:30]:<35} {'Error':<10} {'Error':>8}")
+
+    print("-" * 85)
+    print(f"{'Total':<8} {total_releases:<8}")
+    print()
 
 
 def main():
@@ -196,7 +305,7 @@ def main():
     )
     parser.add_argument(
         "release",
-        help="Release version (e.g., 4.21, 4.19)"
+        help="Release version (e.g., 4.21, 4.19) or 'all' for summary report of 4.12-4.22"
     )
     parser.add_argument(
         "--stream",
@@ -219,6 +328,12 @@ def main():
         help="Number of days back from today to filter (e.g., 7, 14)"
     )
     parser.add_argument(
+        "--offset",
+        type=int,
+        default=0,
+        help="Number of days to offset backwards from today before applying --days filter (e.g., --days 2 --offset -1 means 2 days starting from 1 day ago)"
+    )
+    parser.add_argument(
         "--source",
         choices=["sippy", "rc"],
         default="sippy",
@@ -227,12 +342,26 @@ def main():
 
     args = parser.parse_args()
 
+    # Handle 'all' option for summary report
+    if args.release.lower() == "all":
+        generate_summary_report(
+            args.stream,
+            args.arch,
+            args.days,
+            abs(args.offset) if args.offset < 0 else args.offset,  # Convert negative to positive
+            args.source,
+            args.base_url
+        )
+        return
+
+    # Handle specific release
     if args.source == "rc":
         release_data = get_release_tags_from_rc(
             args.release,
             args.stream,
             args.arch,
-            args.days
+            args.days,
+            abs(args.offset) if args.offset < 0 else args.offset  # Convert negative to positive
         )
     else:
         release_data = get_release_tags_from_sippy(
@@ -240,8 +369,27 @@ def main():
             args.stream,
             args.arch,
             args.days,
+            abs(args.offset) if args.offset < 0 else args.offset,  # Convert negative to positive
             args.base_url
         )
+
+    # Print header with release count and date range
+    print(f"Found {len(release_data)} releases:")
+
+    # Display date range if filtering is applied
+    if args.days:
+        offset_days = abs(args.offset) if args.offset < 0 else args.offset
+        end_time = datetime.now(timezone.utc) - timedelta(days=offset_days)
+        start_time = end_time - timedelta(days=args.days - 1)  # Include today as day 1
+
+        end_str = end_time.strftime("%Y-%m-%d (%A)")
+        start_str = start_time.strftime("%Y-%m-%d (%A)")
+
+        print(f"Time range: {start_str} to {end_str}")
+        if offset_days > 0:
+            print(f"Offset: {offset_days} days back from today")
+
+    print()
 
     # Print each release tag with visual hours representation
     for i, item in enumerate(release_data):
